@@ -1,4 +1,4 @@
-package com.example.gangwontripy.ui.mypage;
+package com.example.gangwontripy.ui.directions;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,13 +11,13 @@ import androidx.fragment.app.Fragment;
 
 import com.example.gangwontripy.R;
 
-public class MyPageFragment extends Fragment {
+public class DirectionsFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
         // 레이아웃 파일을 View 객체로 변환(inflate)
-        View view = inflater.inflate(R.layout.fragment_my_page, container, false);
+        View view = inflater.inflate(R.layout.fragment_directions, container, false);
         // view 객체 반환 -> 시스템이 view를 화면에 그려줌
         return view;
     }
