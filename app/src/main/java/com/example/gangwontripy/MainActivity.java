@@ -8,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.kakao.vectormap.KakaoMapSdk;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         // 하단 네비게이션 바 구현
         // 1. 레이아웃에서 BottomNavigationView 찾기
         BottomNavigationView bottomNavView = findViewById(R.id.bottom_nav_view);
