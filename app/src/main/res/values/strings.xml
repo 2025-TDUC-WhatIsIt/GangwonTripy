@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">GangwonTripy</string>
+    
+    <string name="splash_text">강원도 횡성, 홍전, 인제의\n지역화폐 가맹점을 담은</string>
+    <string name="splash_teamname_text">Team. What is it</string>
 </resources>
