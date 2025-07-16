@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.GangwonTripy" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.GangwonTripy" parent="Theme.Material3.Light.NoActionBar">
+
         <!-- Primary brand color (light theme) -->
         <item name="colorPrimary">@color/dark_green</item> // 앱 맨 위 배경 색, 버튼 색
         <item name="colorPrimaryVariant">@color/white</item> // 앱 맨 위 글자 색

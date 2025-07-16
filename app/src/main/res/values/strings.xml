@@ -3,4 +3,16 @@
     
     <string name="splash_text">강원도 횡성, 홍전, 인제의\n지역화폐 가맹점을 담은</string>
     <string name="splash_teamname_text">Team. What is it</string>
+
+    <!-- 마이페이지 목록 -->
+    <string name="my_page_list_text1">즐겨찾기</string>
+    <string name="my_page_list_text2">진행중인 이벤트</string>
+    <string name="my_page_list_text3">할인쿠폰</string>
+    <string name="my_page_list_text4">친구초대</string>
+    <string name="my_page_list_text5">자주 묻는 질문</string>
+    <string name="my_page_list_text6">설정</string>
+    <string name="my_page_list_text7">공지사항</string>
+    <string name="my_page_list_text8">약관 및 정책</string>
+    <string name="my_page_list_text9">개인정보 처리방침</string>
+
 </resources>

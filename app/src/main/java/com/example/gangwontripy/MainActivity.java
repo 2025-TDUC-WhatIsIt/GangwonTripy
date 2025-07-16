@@ -1,6 +1,7 @@
 package com.example.gangwontripy;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -9,12 +10,16 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.kakao.vectormap.KakaoMapSdk;
+import com.kakao.sdk.common.util.Utility;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        키 해시 확인용 코드
+//        String keyHash = Utility.INSTANCE.getKeyHash(this);
+//        Log.d("KeyHash", keyHash);
         setContentView(R.layout.activity_main);
         // 하단 네비게이션 바 구현
         // 1. 레이아웃에서 BottomNavigationView 찾기

@@ -57,6 +57,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:$nav_version")
     implementation("androidx.navigation:navigation-ui:$nav_version")
     implementation("com.kakao.maps.open:android:2.12.8")
+    implementation("com.kakao.sdk:v2-common:2.20.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
