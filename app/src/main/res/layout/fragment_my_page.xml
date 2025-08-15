@@ -13,14 +13,14 @@
         android:padding="16dp"
         android:baselineAligned="false">
 
-        <!-- 1. 닉네임 ("오니") -->
+        <!-- 1.  -->
         <TextView
             android:paddingTop="40dp"
             android:id="@+id/nickname"
-            android:text="오니"
+            android:text="프로필"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="32dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
