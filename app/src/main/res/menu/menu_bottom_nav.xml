@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/homeFragment"
-        android:icon="@drawable/home"
+        android:icon="@drawable/img_home"
         android:title="홈"/>
 
     <item
         android:id="@+id/directionsFragment"
-        android:icon="@drawable/location"
-        android:title="길찾기"/>
+        android:icon="@drawable/img_map_pin"
+        android:title="내주변"/>
 
     <item
         android:id="@+id/rewardFragment"
-        android:icon="@drawable/coin"
-        android:title="리워드"/>
+        android:icon="@drawable/img_bookmark"
+        android:title="북마크"/>
 
     <item
         android:id="@+id/myPageFragment"
-        android:icon="@drawable/user"
+        android:icon="@drawable/img_user"
         android:title="마이페이지"/>
 
 </menu>
