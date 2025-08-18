@@ -54,6 +54,7 @@ dependencies {
 
     // Jetpack Navigation Component
     val nav_version = "2.7.7"
+    implementation ("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.navigation:navigation-fragment:$nav_version")
     implementation("androidx.navigation:navigation-ui:$nav_version")
     implementation("com.kakao.maps.open:android:2.12.8")
@@ -61,7 +62,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.google.android.material:material:1.9.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 }
