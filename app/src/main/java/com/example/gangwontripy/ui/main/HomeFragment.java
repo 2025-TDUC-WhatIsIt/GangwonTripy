@@ -1,9 +1,13 @@
 package com.example.gangwontripy.ui.main;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,58 +15,422 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.data.api.ApiService;
+import com.example.gangwontripy.data.api.FestivalCallback;
+import com.example.gangwontripy.data.api.TourCallback;
+import com.example.gangwontripy.data.model.FestivalItem;
 import com.example.gangwontripy.data.model.MarketItem;
+import com.example.gangwontripy.data.model.TouristSpotItem;
+import com.example.gangwontripy.ui.main.home.FestivalAdapter;
 import com.example.gangwontripy.ui.main.home.MarketAdapter;
+import com.example.gangwontripy.ui.main.home.TouristSpotPagerAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class HomeFragment extends Fragment{
+public class HomeFragment extends Fragment {
 
-    @Nullable
-    @Override
+    // -------- 관광명소(ViewPager2) --------
+    private ViewPager2 touristPager;
+    private TouristSpotPagerAdapter touristAdapter;
+    private LinearLayout dotsTourist;                 // 관광명소 도트 컨테이너
+    private static final int MAX_DOTS = 5;            // 최대 5개
+
+    private final Handler autoHandler = new Handler(Looper.getMainLooper());
+    private final long AUTO_DELAY_MS = 3000L;
+    private final Runnable autoRunnable = new Runnable() {
+        @Override public void run() {
+            if (touristPager != null && touristAdapter != null) {
+                int count = touristAdapter.getRealCount();
+                if (count > 1) {
+                    int next = (touristPager.getCurrentItem() + 1) % count;
+                    touristPager.setCurrentItem(next, true);
+                    autoHandler.postDelayed(this, AUTO_DELAY_MS);
+                }
+            }
+        }
+    };
+
+    // -------- 축제(RecyclerView+Snap) --------
+    private RecyclerView festivalRv;
+    private FestivalAdapter festivalAdapter;
+    private LinearLayout dotsFestival;                // 축제 도트 컨테이너
+    private PagerSnapHelper festivalSnapHelper;
+    private final Handler festivalAutoHandler = new Handler(Looper.getMainLooper());
+    private final long FESTIVAL_AUTO_DELAY_MS = 3000L;
+    private final Runnable festivalAutoRunnable = new Runnable() {
+        @Override public void run() {
+            if (festivalRv == null || festivalAdapter == null) return;
+            int count = festivalAdapter.getItemCount();
+            if (count <= 1) return;
+            int cur = getSnappedPosition(festivalRv, festivalSnapHelper);
+            if (cur == RecyclerView.NO_POSITION) cur = 0;
+            int next = (cur + 1) % count;
+            festivalRv.smoothScrollToPosition(next);
+            festivalAutoHandler.postDelayed(this, FESTIVAL_AUTO_DELAY_MS);
+        }
+    };
+
+    private final ApiService apiService = new ApiService();
+
+    @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
-        // 레이아웃 파일을 View 객체로 변환(inflate)
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-        // view 객체 반환 -> 시스템이 view를 화면에 그려줌
-        return view;
+        return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
-    // onCreateView 이후에 호출되는 메서드
-    // 버튼 클릭 리스너 등 설정하면 됨
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
-        // --- 전통시장 섹션 초기화 ---
+        // --- 전통시장 섹션: 그대로 ---
         RecyclerView marketRecyclerView = view.findViewById(R.id.recycler_view_market);
-
-        // 1. 임시 데이터 생성
         List<MarketItem> marketDataList = new ArrayList<>();
-        marketDataList.add(new MarketItem("강릉중앙시장", R.drawable.img_rectangle)); // R.drawable... 은 예시 이미지
+        marketDataList.add(new MarketItem("강릉중앙시장", R.drawable.img_rectangle));
         marketDataList.add(new MarketItem("속초관광수산시장", R.drawable.img_rectangle));
         marketDataList.add(new MarketItem("정선아리랑시장", R.drawable.img_rectangle));
         marketDataList.add(new MarketItem("동해동쪽바다중앙시장", R.drawable.img_rectangle));
         marketDataList.add(new MarketItem("원주중앙시장", R.drawable.img_rectangle));
         marketDataList.add(new MarketItem("춘천중앙시장", R.drawable.img_rectangle));
-
-        // 2. 어댑터 생성 및 연결
         MarketAdapter marketAdapter = new MarketAdapter(marketDataList);
         marketRecyclerView.setAdapter(marketAdapter);
-
-        // 3. 레이아웃 매니저 설정 (가로 스크롤)
         marketRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        new PagerSnapHelper().attachToRecyclerView(marketRecyclerView);
 
-        // 4. 페이지 단위 스크롤을 위한 PagerSnapHelper 부착 (🌟 핵심!)
-        // 이 한 줄만으로 아이템들이 카드처럼 페이지 단위로 딱딱 맞게 스크롤됩니다.
-        PagerSnapHelper snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(marketRecyclerView);
+        // --- 관광명소 ViewPager2 & 도트 세팅 ---
+        touristPager = view.findViewById(R.id.viewpager_tourist);
+        touristAdapter = new TouristSpotPagerAdapter();
+        touristPager.setAdapter(touristAdapter);
+        touristPager.setOffscreenPageLimit(1);
+        dotsTourist = view.findViewById(R.id.dots_tourist);
 
-        // 5. 페이지 표시 점들(Dots Indicator) 설정은 고급 기능으로,
-        // CircleIndicator 라이브러리를 사용하거나 직접 구현할 수 있습니다.
-        // 여기서는 RecyclerView까지만 먼저 완성합니다.
+        touristPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            private boolean userDragging = false;
+            @Override public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                    userDragging = true;
+                    stopAutoSlide();
+                } else if (state == ViewPager2.SCROLL_STATE_IDLE && userDragging) {
+                    userDragging = false;
+                    startAutoSlideIfReady();
+                }
+            }
+            @Override public void onPageSelected(int position) {
+                updateTouristDots(position, touristAdapter.getRealCount());
+            }
+        });
 
+        // --- 축제 RecyclerView & 도트 세팅 ---
+        festivalRv = view.findViewById(R.id.recycler_view_festival);
+        festivalAdapter = new FestivalAdapter();
+        festivalRv.setAdapter(festivalAdapter);
+        festivalRv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        festivalSnapHelper = new PagerSnapHelper();
+        festivalSnapHelper.attachToRecyclerView(festivalRv);
+        dotsFestival = view.findViewById(R.id.dots_indicator_festival);
+
+        festivalRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private boolean userDragging = false;
+            @Override public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    userDragging = true;
+                    festivalStopAutoSlide();
+                } else if (newState == RecyclerView.SCROLL_STATE_IDLE && userDragging) {
+                    userDragging = false;
+                    int pos = getSnappedPosition(festivalRv, festivalSnapHelper);
+                    updateFestivalDots(pos == RecyclerView.NO_POSITION ? 0 : pos, festivalAdapter.getItemCount());
+                    festivalStartAutoSlideIfReady();
+                }
+            }
+        });
+
+        // --- 데이터 로드 ---
+        fetchAllFestivals(festivalAdapter); // 축제
+        fetchAllRegions();                  // 관광명소(횡성+인제+홍천)
+    }
+
+    // ---------------- 축제 데이터 로드/바인딩 ----------------
+    private void fetchAllFestivals(FestivalAdapter adapter) {
+        List<FestivalItem> all = new ArrayList<>();
+        AtomicInteger remain = new AtomicInteger(3);
+
+        FestivalCallback cb = new FestivalCallback() {
+            @Override public void onSuccess(List<FestivalItem> items) {
+                if (items != null) all.addAll(items);
+                if (remain.decrementAndGet() == 0) onAllFestivalsLoaded(all, adapter);
+            }
+            @Override public void onError(Exception e) {
+                if (remain.decrementAndGet() == 0) onAllFestivalsLoaded(all, adapter);
+            }
+        };
+
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(18), cb); // 횡성
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(10), cb); // 인제
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(16), cb); // 홍천
+    }
+
+    private void onAllFestivalsLoaded(List<FestivalItem> all, FestivalAdapter adapter) {
+        if (all == null) all = new ArrayList<>();
+
+        // 중복 제거
+        List<String> seen = new ArrayList<>();
+        List<FestivalItem> dedup = new ArrayList<>();
+        for (FestivalItem f : all) {
+            if (f.getContentId() == null) { dedup.add(f); continue; }
+            if (!seen.contains(f.getContentId())) {
+                seen.add(f.getContentId());
+                dedup.add(f);
+            }
+        }
+
+        // 시작일 오름차순(빈 값은 뒤로)
+        Collections.sort(dedup, (a, b) -> {
+            String sa = a.getEventStartDate() == null ? "" : a.getEventStartDate();
+            String sb = b.getEventStartDate() == null ? "" : b.getEventStartDate();
+            if (sa.isEmpty() && sb.isEmpty()) return 0;
+            if (sa.isEmpty()) return 1;
+            if (sb.isEmpty()) return -1;
+            return sa.compareTo(sb);
+        });
+
+        adapter.submitList(dedup);
+
+        // 도트 & 자동 슬라이드 시작
+        setupFestivalDots(adapter.getItemCount());
+        int pos = getSnappedPosition(festivalRv, festivalSnapHelper);
+        updateFestivalDots(pos == RecyclerView.NO_POSITION ? 0 : pos, adapter.getItemCount());
+        festivalStartAutoSlideIfReady();
+    }
+
+    // ---------------- 관광명소 데이터 로드/바인딩 ----------------
+    private void fetchAllRegions() {
+        List<TouristSpotItem> all = new ArrayList<>();
+        AtomicInteger remain = new AtomicInteger(3);
+
+        TourCallback cb = new TourCallback() {
+            @Override public void onSuccess(List<TouristSpotItem> items) {
+                if (items != null) all.addAll(items);
+                if (remain.decrementAndGet() == 0) onAllRegionLoaded(all);
+            }
+            @Override public void onError(Exception e) {
+                if (remain.decrementAndGet() == 0) onAllRegionLoaded(all);
+            }
+        };
+
+        apiService.fetchTourSpotsAsync(ApiService.HOENGSEONG_NATURAL_URL, cb);
+        apiService.fetchTourSpotsAsync(ApiService.INJE_NATURAL_URL, cb);
+        apiService.fetchTourSpotsAsync(ApiService.HONGCHEON_NATURAL_URL, cb);
+    }
+
+    private void onAllRegionLoaded(List<TouristSpotItem> all) {
+        if (all.isEmpty()) return;
+
+        // 최신 수정일 내림차순
+        Collections.sort(all, new Comparator<TouristSpotItem>() {
+            @Override public int compare(TouristSpotItem o1, TouristSpotItem o2) {
+                String t1 = o1.getModifiedTime() == null ? "" : o1.getModifiedTime();
+                String t2 = o2.getModifiedTime() == null ? "" : o2.getModifiedTime();
+                return t2.compareTo(t1);
+            }
+        });
+
+        // 이미지 있는 항목 우선
+        List<TouristSpotItem> withImg = new ArrayList<>();
+        List<TouristSpotItem> noImg  = new ArrayList<>();
+        for (TouristSpotItem it : all) {
+            String img = TextUtils.isEmpty(it.getFirstImage()) ? it.getFirstImage2() : it.getFirstImage();
+            if (TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
+        }
+        withImg.addAll(noImg);
+
+        touristAdapter.submitList(withImg);
+
+        // 도트 & 자동 슬라이드
+        setupTouristDots(touristAdapter.getRealCount());
+        updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());
+        startAutoSlideIfReady();
+    }
+
+    // ---------------- 관광명소 도트 ----------------
+    private void setupTouristDots(int total) {
+        if (dotsTourist == null) return;
+        dotsTourist.removeAllViews();
+
+        int visibleDots = Math.min(total, MAX_DOTS);
+        if (visibleDots == 0) return;
+
+        int dotSizePx = dp(8);
+        int dotMarginPx = dp(4);
+
+        for (int i = 0; i < visibleDots; i++) {
+            View dot = new View(requireContext());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dotSizePx, dotSizePx);
+            lp.setMargins(dotMarginPx, dotMarginPx, dotMarginPx, dotMarginPx);
+            dot.setLayoutParams(lp);
+            dot.setBackgroundResource(R.drawable.dot_unselected);
+            dotsTourist.addView(dot);
+        }
+    }
+
+    private void updateTouristDots(int position, int total) {
+        if (dotsTourist == null || dotsTourist.getChildCount() == 0 || total == 0) return;
+
+        int visible = Math.min(total, MAX_DOTS);
+        int half = visible / 2; // 5 -> 2
+        int start = position - half;
+        if (start < 0) start = 0;
+        if (start > total - visible) start = Math.max(0, total - visible);
+
+        int center = position - start; // 0..visible-1
+        boolean hasBefore = start > 0;
+        boolean hasAfter  = (start + visible) < total;
+
+        int SIZE_EDGE_MORE = dp(5);
+        int SIZE_FAR       = dp(6);
+        int SIZE_NEAR      = dp(8);
+        int SIZE_CENTER    = dp(10);
+
+        float ALPHA_EDGE_MORE = 0.50f;
+        float ALPHA_FAR       = 0.70f;
+        float ALPHA_NEAR      = 0.85f;
+        float ALPHA_CENTER    = 1.00f;
+
+        for (int i = 0; i < visible; i++) {
+            View dot = dotsTourist.getChildAt(i);
+            int absDist = Math.abs(i - center);
+
+            int size; float alpha;
+            if (absDist == 0) { size = SIZE_CENTER; alpha = ALPHA_CENTER; }
+            else if (absDist == 1) { size = SIZE_NEAR; alpha = ALPHA_NEAR; }
+            else { size = SIZE_FAR; alpha = ALPHA_FAR; }
+
+            if (i == 0 && hasBefore) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
+            if (i == visible - 1 && hasAfter) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
+
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) dot.getLayoutParams();
+            lp.width = size; lp.height = size; dot.setLayoutParams(lp);
+            dot.setAlpha(alpha);
+            dot.setBackgroundResource(i == center ? R.drawable.dot_selected : R.drawable.dot_unselected);
+            dot.requestLayout();
+        }
+    }
+
+    // ---------------- 축제 도트 ----------------
+    private void setupFestivalDots(int total) {
+        if (dotsFestival == null) return;
+        dotsFestival.removeAllViews();
+
+        int visibleDots = Math.min(total, MAX_DOTS);
+        if (visibleDots == 0) return;
+
+        int dotSizePx = dp(8);
+        int dotMarginPx = dp(4);
+
+        for (int i = 0; i < visibleDots; i++) {
+            View dot = new View(requireContext());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dotSizePx, dotSizePx);
+            lp.setMargins(dotMarginPx, dotMarginPx, dotMarginPx, dotMarginPx);
+            dot.setLayoutParams(lp);
+            dot.setBackgroundResource(R.drawable.dot_unselected);
+            dotsFestival.addView(dot);
+        }
+    }
+
+    private void updateFestivalDots(int position, int total) {
+        if (dotsFestival == null || dotsFestival.getChildCount() == 0 || total == 0) return;
+
+        int visible = Math.min(total, MAX_DOTS);
+        int half = visible / 2;
+        int start = position - half;
+        if (start < 0) start = 0;
+        if (start > total - visible) start = Math.max(0, total - visible);
+
+        int center = position - start;
+        boolean hasBefore = start > 0;
+        boolean hasAfter  = (start + visible) < total;
+
+        int SIZE_EDGE_MORE = dp(5);
+        int SIZE_FAR       = dp(6);
+        int SIZE_NEAR      = dp(8);
+        int SIZE_CENTER    = dp(10);
+
+        float ALPHA_EDGE_MORE = 0.50f;
+        float ALPHA_FAR       = 0.70f;
+        float ALPHA_NEAR      = 0.85f;
+        float ALPHA_CENTER    = 1.00f;
+
+        for (int i = 0; i < visible; i++) {
+            View dot = dotsFestival.getChildAt(i);
+            int absDist = Math.abs(i - center);
+
+            int size; float alpha;
+            if (absDist == 0) { size = SIZE_CENTER; alpha = ALPHA_CENTER; }
+            else if (absDist == 1) { size = SIZE_NEAR; alpha = ALPHA_NEAR; }
+            else { size = SIZE_FAR; alpha = ALPHA_FAR; }
+
+            if (i == 0 && hasBefore) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
+            if (i == visible - 1 && hasAfter) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
+
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) dot.getLayoutParams();
+            lp.width = size; lp.height = size; dot.setLayoutParams(lp);
+            dot.setAlpha(alpha);
+            dot.setBackgroundResource(i == center ? R.drawable.dot_selected : R.drawable.dot_unselected);
+            dot.requestLayout();
+        }
+    }
+
+    // ---------------- 공통 유틸/생명주기 ----------------
+    private int getSnappedPosition(RecyclerView rv, PagerSnapHelper helper) {
+        if (rv == null || helper == null || rv.getLayoutManager() == null) return RecyclerView.NO_POSITION;
+        View snap = helper.findSnapView(rv.getLayoutManager());
+        return (snap == null) ? RecyclerView.NO_POSITION : rv.getLayoutManager().getPosition(snap);
+    }
+
+    private int dp(int v) {
+        float d = getResources().getDisplayMetrics().density;
+        return (int) (v * d + 0.5f);
+    }
+
+    // 관광명소 자동 슬라이드
+    private void startAutoSlideIfReady() {
+        stopAutoSlide();
+        if (touristAdapter != null && touristAdapter.getRealCount() > 1) {
+            autoHandler.postDelayed(autoRunnable, AUTO_DELAY_MS);
+        }
+    }
+    private void stopAutoSlide() {
+        autoHandler.removeCallbacksAndMessages(null);
+    }
+
+    // 축제 자동 슬라이드
+    private void festivalStartAutoSlideIfReady() {
+        festivalStopAutoSlide();
+        if (festivalAdapter != null && festivalAdapter.getItemCount() > 1) {
+            festivalAutoHandler.postDelayed(festivalAutoRunnable, FESTIVAL_AUTO_DELAY_MS);
+        }
+    }
+    private void festivalStopAutoSlide() {
+        festivalAutoHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        startAutoSlideIfReady();
+        festivalStartAutoSlideIfReady();
+    }
+    @Override public void onPause()  {
+        stopAutoSlide();
+        festivalStopAutoSlide();
+        super.onPause();
+    }
+    @Override public void onDestroyView() {
+        stopAutoSlide();
+        festivalStopAutoSlide();
+        super.onDestroyView();
     }
 }
