@@ -1,276 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".ui.mypage.MyPageFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- 1. "프로필" 타이틀 -->
+    <TextView
+        android:id="@+id/text_title_profile"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:baselineAligned="false">
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:text="프로필"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 1.  -->
-        <TextView
-            android:paddingTop="40dp"
-            android:id="@+id/nickname"
-            android:text="프로필"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="32dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+    <!-- 2. 프로필 정보 카드 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_profile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_title_profile">
 
-        <!-- 2. 요약 정보 (리뷰, 메달, 즐겨찾기) -->
-        <!-- 가로로 3개를 배치하므로 horizontal LinearLayout 사용 -->
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+            android:padding="20dp">
 
-            <!-- 내가 남긴 리뷰 (숫자+텍스트 세로 배치) -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <!-- 왼쪽: 프로필 사진과 이름 -->
+            <ImageView
+                android:id="@+id/image_profile"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_gone"
+                android:layout_marginLeft="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView android:text="내가 남긴 리뷰"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <TextView android:text="15"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:textSize="25sp"
-                    android:gravity="center"/>
-            </LinearLayout>
-            <!-- 내가 모은 메달 (똑같은 구조) -->
-            <LinearLayout
-                android:layout_width="0dp"
+                android:layout_marginTop="8dp"
+                android:text="재원"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/image_profile"
+                app:layout_constraintStart_toStartOf="@id/image_profile"
+                app:layout_constraintTop_toBottomOf="@id/image_profile" />
+
+            <TextView
+                android:id="@+id/text_nickname"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView android:text="내가 모은 메달"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <TextView android:text="30"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:textSize="30sp"
-                    android:gravity="center"/>
-            </LinearLayout>
-            <!-- 즐겨찾기 (똑같은 구조) -->
-            <LinearLayout
-                android:layout_width="0dp"
+                android:text="(칭호)"
+                android:textColor="#808080"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/text_name"
+                app:layout_constraintStart_toStartOf="@id/text_name"
+                app:layout_constraintTop_toBottomOf="@id/text_name" />
+
+            <!-- 오른쪽: 배지, 칭호, 방문 일지 -->
+            <TextView
+                android:id="@+id/text_badge_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView android:text="즐겨찾기"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <TextView android:text="7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:textSize="25sp"
-                    android:gravity="center"/>
-            </LinearLayout>
-        </LinearLayout>
+                android:layout_marginStart="50dp"
+                android:text="내가 모은 배지"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@id/image_profile"
+                app:layout_constraintTop_toTopOf="@id/image_profile" />
 
-        <!-- 3. "자세히 보기" 버튼 -->
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/view_details_button"
-            android:layout_width="340dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/my_page_btn1"
-            android:text="자세히 보기"
-            android:textColor="@color/bright_green"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/text_badge_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7개"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/text_badge_title"
+                app:layout_constraintTop_toBottomOf="@id/text_badge_title" />
 
-        <!-- 구분선 -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"/>
+            <TextView
+                android:id="@+id/text_my_title_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="내가 받은 칭호"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="@id/text_badge_title"
+                app:layout_constraintTop_toBottomOf="@id/text_badge_count" />
 
-        <!-- 4. 메뉴 목록 (즐겨찾기, 이벤트, 설정 등) -->
-        <!-- 내용이 정적이고 많지 않다면 그냥 TextView를 쌓아도 되지만, RecyclerView가 확장성에 좋음 -->
-        <TextView
-            android:id="@+id/menu_favorites"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
+            <TextView
+                android:id="@+id/text_my_title_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7개"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/text_my_title_title"
+                app:layout_constraintTop_toBottomOf="@id/text_my_title_title" />
 
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
+            <TextView
+                android:id="@+id/text_visit_log_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="나의 방문 일지"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="@id/text_my_title_title"
+                app:layout_constraintTop_toBottomOf="@id/text_my_title_count" />
 
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text1"
-            android:textSize="16sp" />
+            <TextView
+                android:id="@+id/text_visit_log_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7개"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/text_visit_log_title"
+                app:layout_constraintTop_toBottomOf="@id/text_visit_log_title" />
 
-        <TextView
-            android:id="@+id/menu_running_events"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text2"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/menu_coupons"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text3"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/menu_friend_inviting"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text4"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/menu_faq"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text5"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/menu_settings"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text6"
-            android:textSize="16sp" />
+    <!-- 3. 메뉴 목록 -->
+    <!-- Codia가 만든 복잡한 FrameLayout 대신, đơn giản한 LinearLayout과 TextView로 재구성합니다. -->
+    <LinearLayout
+        android:id="@+id/menu_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="@id/card_profile"
+        app:layout_constraintStart_toStartOf="@id/card_profile"
+        app:layout_constraintTop_toBottomOf="@id/card_profile">
 
         <TextView
             android:id="@+id/menu_notice"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text7"
-            android:textSize="16sp" />
+            style="@style/ProfileMenuItem"
+            android:text="공지사항"
+            app:drawableStartCompat="@drawable/ic_notice" />
 
         <TextView
-            android:id="@+id/menu_terms_and_policies"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
-
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
-
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text8"
-            android:textSize="16sp" />
+            android:id="@+id/menu_faq"
+            style="@style/ProfileMenuItem"
+            android:text="자주 묻는 질문"
+            app:drawableStartCompat="@drawable/ic_faq" />
 
         <TextView
-            android:id="@+id/menu_privacy_policy"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="1dp"
+            android:id="@+id/menu_terms"
+            style="@style/ProfileMenuItem"
+            android:text="약관 및 정책"
+            app:drawableStartCompat="@drawable/ic_info" />
 
-            android:layout_marginBottom="1dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:drawableStart="@android:drawable/btn_star"
-            android:drawablePadding="6dp"
-            android:focusable="true"
+        <TextView
+            android:id="@+id/menu_privacy"
+            style="@style/ProfileMenuItem"
+            android:text="개인정보처리방침"
+            app:drawableStartCompat="@drawable/ic_info" />
 
-            android:gravity="center_vertical"
-            android:padding="6dp"
-            android:text="@string/my_page_list_text9"
-            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/menu_logout"
+            style="@style/ProfileMenuItem"
+            android:text="로그아웃"
+            app:drawableStartCompat="@drawable/ic_logout" />
 
-
-
-
+        <TextView
+            android:id="@+id/menu_withdraw"
+            style="@style/ProfileMenuItem"
+            android:text="회원탈퇴"
+            app:drawableStartCompat="@drawable/ic_withdraw" />
 
     </LinearLayout>
-</ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

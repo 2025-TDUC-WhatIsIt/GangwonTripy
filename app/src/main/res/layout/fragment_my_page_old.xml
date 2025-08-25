@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.mypage.MyPageFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:baselineAligned="false">
+
+        <!-- 1.  -->
+        <TextView
+            android:paddingTop="40dp"
+            android:id="@+id/nickname"
+            android:text="프로필"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- 2. 요약 정보 (리뷰, 메달, 즐겨찾기) -->
+        <!-- 가로로 3개를 배치하므로 horizontal LinearLayout 사용 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp">
+
+            <!-- 내가 남긴 리뷰 (숫자+텍스트 세로 배치) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView android:text="내가 남긴 리뷰"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView android:text="15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:textSize="25sp"
+                    android:gravity="center"/>
+            </LinearLayout>
+            <!-- 내가 모은 메달 (똑같은 구조) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView android:text="내가 모은 메달"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView android:text="30"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:textSize="30sp"
+                    android:gravity="center"/>
+            </LinearLayout>
+            <!-- 즐겨찾기 (똑같은 구조) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView android:text="즐겨찾기"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView android:text="7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:textSize="25sp"
+                    android:gravity="center"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 3. "자세히 보기" 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/view_details_button"
+            android:layout_width="340dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/my_page_btn1"
+            android:text="자세히 보기"
+            android:textColor="@color/bright_green"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- 구분선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 4. 메뉴 목록 (즐겨찾기, 이벤트, 설정 등) -->
+        <!-- 내용이 정적이고 많지 않다면 그냥 TextView를 쌓아도 되지만, RecyclerView가 확장성에 좋음 -->
+        <TextView
+            android:id="@+id/menu_favorites"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text1"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_running_events"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text2"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_coupons"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text3"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_friend_inviting"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text4"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_faq"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text5"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_settings"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text6"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_notice"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text7"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_terms_and_policies"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text8"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/menu_privacy_policy"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="1dp"
+
+            android:layout_marginBottom="1dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/btn_star"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+
+            android:gravity="center_vertical"
+            android:padding="6dp"
+            android:text="@string/my_page_list_text9"
+            android:textSize="16sp" />
+
+
+
+
+
+    </LinearLayout>
+</ScrollView>
