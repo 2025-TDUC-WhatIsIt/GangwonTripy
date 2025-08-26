@@ -22,8 +22,11 @@
             android:background="@color/bright_green">
 
             <!-- 검색창 -->
-            <TextView
+            <EditText
                 android:id="@+id/search_bar"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="55dp"
@@ -32,7 +35,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/img_rectangle"
                 android:gravity="center"
-                android:text="검색어를 입력해주세요."
+                android:hint="검색어를 입력해주세요."
                 android:textColor="#808080"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"

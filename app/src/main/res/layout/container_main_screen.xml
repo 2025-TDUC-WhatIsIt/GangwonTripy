@@ -1,288 +1,332 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container_main_screen"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="32dp"
-    android:background="@drawable/img_rectangle1"> <!-- 흰색 둥근 사각형 배경 -->
+    android:paddingBottom="32dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <!-- ======================================================= -->
+        <!-- 1. 기본 상태(Default State)를 감싸는 컨테이너 -->
+        <!-- ======================================================= -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/default_state_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- 무엇을 먹을까요? -->
+            <TextView
+                android:id="@+id/text_what_to_eat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="32dp"
+                android:text="어다로 갈까요?"
+                android:textColor="#FF000000"
+                android:textSize="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 음식 종류 아이콘 (LinearLayout으로 수평 정렬) -->
+            <LinearLayout
+                android:id="@+id/container_food_types"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_what_to_eat">
+
+                <!-- Codia가 만든 FrameLayout들을 아래처럼 단순화합니다 -->
+                <LinearLayout
+                    android:id="@+id/button_home_korean_food"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/img_smile" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="한식"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/img_smile" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="한식"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/img_smile" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="한식"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/img_smile" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="한식"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/img_smile" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="한식"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- (나머지 아이콘들도 위와 같은 구조로 4개 더 추가) -->
+
+            </LinearLayout>
+
+            <!-- 맛집을 추천해드릴게요! -->
+            <TextView
+                android:id="@+id/text_recommend_restaurant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="32dp"
+                android:text="지나친 관광 명소!"
+                android:textColor="#FF000000"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/container_food_types" />
+
+            <!-- 맛집 카드 (예시 1개) -->
+            <ImageView
+                android:id="@+id/img_restaurant_card"
+                android:layout_width="156dp"
+                android:layout_height="80dp"
+                android:layout_marginTop="21dp"
+                android:background="@drawable/img_rectangle3"
+                app:layout_constraintStart_toStartOf="@id/text_recommend_restaurant"
+                app:layout_constraintTop_toBottomOf="@id/text_recommend_restaurant" />
+
+            <!-- (맛집 정보 텍스트들을 이 카드에 맞춰서 제약 조건 설정) -->
 
 
-  <!-- 무엇을 먹을까요? -->
-  <TextView
-      android:id="@+id/text_what_to_eat"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="32dp"
-      android:layout_marginTop="32dp"
-      android:text="어다로 갈까요?"
-      android:textColor="#FF000000"
-      android:textSize="16dp"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+            <!-- 관광명소 -->
+            <TextView
+                android:id="@+id/text_tourist_attractions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="금주의 이슈"
+                android:textColor="#FF000000"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/img_restaurant_card" />
 
-  <!-- 음식 종류 아이콘 (LinearLayout으로 수평 정렬) -->
-  <LinearLayout
-      android:id="@+id/container_food_types"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:gravity="center"
-      android:orientation="horizontal"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/text_what_to_eat">
+            <!-- 관광명소 카드 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewpager_tourist"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginStart="55dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="55dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_tourist_attractions" />
 
-    <!-- Codia가 만든 FrameLayout들을 아래처럼 단순화합니다 -->
-    <LinearLayout
-        android:id="@+id/button_home_korean_food"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-      <ImageView
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:src="@drawable/img_smile" />
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:text="한식"
-          android:textSize="11sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-      <ImageView
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:src="@drawable/img_smile" />
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:text="한식"
-          android:textSize="11sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-      <ImageView
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:src="@drawable/img_smile" />
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:text="한식"
-          android:textSize="11sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-      <ImageView
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:src="@drawable/img_smile" />
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:text="한식"
-          android:textSize="11sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-      <ImageView
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:src="@drawable/img_smile" />
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="4dp"
-          android:text="한식"
-          android:textSize="11sp" />
-    </LinearLayout>
+            <!-- (선택) 점 인디케이터를 쓸 거면 TabLayout 추가 -->
+            <LinearLayout
+                android:id="@+id/dots_tourist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/viewpager_tourist" />
+            <!-- 새로운 섹션: 전통시장 -->
+            <TextView
+                android:id="@+id/text_traditional_market"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:text="맛집소개"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/viewpager_tourist" /> <!-- 이전 섹션 아래에 배치 -->
 
-    <!-- (나머지 아이콘들도 위와 같은 구조로 4개 더 추가) -->
+            <!-- 좌우 스크롤을 위한 RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_market"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_traditional_market" />
 
-  </LinearLayout>
+            <!-- 페이지 표시 점들 -->
+            <LinearLayout
+                android:id="@+id/dots_indicator_market"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recycler_view_market" />
 
-  <!-- 맛집을 추천해드릴게요! -->
-  <TextView
-      android:id="@+id/text_recommend_restaurant"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="32dp"
-      android:layout_marginTop="32dp"
-      android:text="지나친 관광 명소!"
-      android:textColor="#FF000000"
-      android:textSize="16sp"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/container_food_types" />
-  <!-- 관광명소 카드 -->
+            <!-- 새로운 섹션: 지역축제 -->
+            <TextView
+                android:id="@+id/text_region_festival"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="지역축제"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dots_indicator_market" /> <!-- 이전 섹션 아래에 배치 -->
 
-  <androidx.viewpager2.widget.ViewPager2
-      android:id="@+id/viewpager_tourist"
-      android:layout_width="0dp"
-      android:layout_height="250dp"
-      android:layout_marginStart="55dp"
-      android:layout_marginTop="15dp"
-      android:layout_marginEnd="55dp"
-      app:layout_constraintTop_toBottomOf="@id/text_recommend_restaurant"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintEnd_toEndOf="parent" />
+            <!-- 좌우 스크롤을 위한 RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_festival"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_region_festival" />
 
-  <!-- (선택) 점 인디케이터를 쓸 거면 TabLayout 추가 -->
-  <LinearLayout
-      android:id="@+id/dots_tourist"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:layout_marginTop="15dp"
-      app:layout_constraintTop_toBottomOf="@id/viewpager_tourist"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"/>
-  <!-- 새로운 섹션: 전통시장 -->
+            <!-- 페이지 표시 점들 -->
+            <LinearLayout
+                android:id="@+id/dots_indicator_festival"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recycler_view_festival" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- ======================================================= -->
+        <!-- 2. 검색 결과 상태(Search Result State)를 위한 RecyclerView -->
+        <!-- ======================================================= -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_result_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:listitem="@layout/item_spot" />
 
-  <!-- 관광명소 -->
-  <TextView
-      android:id="@+id/text_tourist_attractions"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="15dp"
-      android:text="금주의 이슈"
-      android:textColor="#FF000000"
-      android:textSize="16sp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/dots_tourist" />
+        <!-- ======================================================= -->
+        <!-- 3. 로딩 상태(Loading State)를 위한 ProgressBar -->
+        <!-- ======================================================= -->
+        <ProgressBar
+            android:id="@+id/loading_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
-  <!-- 맛집 카드 (예시 1개) -->
-  <ImageView
-      android:id="@+id/img_restaurant_card"
-      android:layout_width="156dp"
-      android:layout_height="80dp"
-      android:layout_marginTop="21dp"
-      android:background="@drawable/img_rectangle3"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/text_tourist_attractions" />
-
-  <!-- (맛집 정보 텍스트들을 이 카드에 맞춰서 제약 조건 설정) -->
-
-
-
-  <TextView
-      android:id="@+id/text_traditional_market"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="50dp"
-      android:text="맛집소개"
-      android:textColor="#000000"
-      android:textSize="18sp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/img_restaurant_card" /> <!-- 이전 섹션 아래에 배치 -->
-
-  <!-- 좌우 스크롤을 위한 RecyclerView -->
-  <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/recycler_view_market"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:clipToPadding="false"
-      android:orientation="horizontal"
-      android:paddingStart="24dp"
-      android:paddingEnd="24dp"
-      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/text_traditional_market" />
-
-  <!-- 페이지 표시 점들 -->
-  <LinearLayout
-      android:id="@+id/dots_indicator_market"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:orientation="horizontal"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/recycler_view_market" />
-
-  <!-- 새로운 섹션: 지역축제 -->
-  <TextView
-      android:id="@+id/text_region_festival"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="32dp"
-      android:text="지역축제"
-      android:textColor="#000000"
-      android:textSize="18sp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/dots_indicator_market" /> <!-- 이전 섹션 아래에 배치 -->
-
-  <!-- 좌우 스크롤을 위한 RecyclerView -->
-  <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/recycler_view_festival"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:clipToPadding="false"
-      android:orientation="horizontal"
-      android:paddingStart="24dp"
-      android:paddingEnd="24dp"
-      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/text_region_festival" />
-
-  <!-- 페이지 표시 점들 -->
-  <LinearLayout
-      android:id="@+id/dots_indicator_festival"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:orientation="horizontal"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/recycler_view_festival" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+</merge>
