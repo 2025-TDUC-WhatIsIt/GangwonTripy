@@ -27,15 +27,15 @@ android {
 
         // 🔐 키 로딩
         val tourApiKey  = secret("TOUR_API_SERVICE_KEY")
-        val kakaoApiKey = secret("KAKAO_API_KEY") // 네가 이미 쓰고 있는 이름 유지
-
+        val kakaoApiKey = secret("KAKAO_API_KEY")
+        val yourIp = secret("YOUR_IP")
         // 매니페스트 치환(카카오 SDK 공통/로그인 등에서 사용)
         manifestPlaceholders["kakao_api_key"] = kakaoApiKey
 
         // 코드에서 사용
         buildConfigField("String", "KAKAO_MAP_KEY", "\"$kakaoApiKey\"")
         buildConfigField("String", "TOUR_API_SERVICE_KEY", "\"$tourApiKey\"")
-
+        buildConfigField ("String", "API_BASE", "\"$yourIp\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
