@@ -33,6 +33,7 @@ import com.example.gangwontripy.data.model.TouristSpotItem;
 import com.example.gangwontripy.ui.main.home.FestivalAdapter;
 import com.example.gangwontripy.ui.main.home.MarketAdapter;
 import com.example.gangwontripy.ui.main.home.TouristSpotPagerAdapter;
+import com.example.gangwontripy.ui.spot.SearchedSpotAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +47,9 @@ public class HomeFragment extends Fragment {
     private RecyclerView searchResultRecyclerView;
     private ProgressBar loadingIndicator;
     private EditText searchBar;
+
+    // 검색
+    private SearchedSpotAdapter searchedSpotAdapter;
 
     // -------- 관광명소(ViewPager2) --------
     private ViewPager2 touristPager;
@@ -105,6 +109,9 @@ public class HomeFragment extends Fragment {
         searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
         searchBar = view.findViewById(R.id.search_bar);
+        searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
+
+        setupRecyclerView();
 
         // 검색창에서 키보드 '검색' 버튼을 눌렀을 때의 동작 설정
         searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -188,20 +195,43 @@ public class HomeFragment extends Fragment {
         fetchAllRegions();                  // 관광명소(횡성+인제+홍천)
     }
 
-    // 실제 검색 로직 수행 (지금은 가짜 데이터로 테스트)
+    private void setupRecyclerView() {
+        // 어댑터 인스턴스 생성
+        searchedSpotAdapter = new SearchedSpotAdapter();
+
+        // RecyclerView에 LayoutManager와 Adapter 설정
+        searchResultRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        searchResultRecyclerView.setAdapter(searchedSpotAdapter);
+    }
+
+    // 검색 로직을 수행하는 메소드
     private void performSearch(String query) {
-        // 1. UI를 '로딩 상태'로 변경
         showLoadingState();
 
-        // 2. (가짜) 2초 딜레이 후 검색 결과 보여주기
-        //    실제로는 여기서 네트워크 API를 호출합니다.
-        new android.os.Handler().postDelayed(() -> {
-            // TODO: 검색 결과를 가져와서 RecyclerView 어댑터에 데이터 설정
-            // searchResultAdapter.submitList(results);
+        // 테스트를 위해 fakeResults 생성
+        List<TouristSpotItem> fakeResults = new ArrayList<>();
 
-            // 3. UI를 '검색 결과 상태'로 변경
-            showSearchResultState();
-        }, 2000); // 2초 딜레이
+        for (int i = 1; i <= 10; i++) {
+            TouristSpotItem item = new TouristSpotItem();
+            // TouristSpotItem의 setter 메소드를 사용하여 가짜 데이터를 채웁니다.
+            item.setContentId("ID_" + i); // 고유 ID는 필수입니다.
+            item.setTitle(query + " 검색 결과 " + i);
+            item.setAddr1("강원도 어딘가 멋진 곳 " + i);
+            // 이미지는 웹 URL을 직접 넣거나, drawable에 있는 샘플 이미지를 사용할 수 있습니다.
+            item.setFirstImage("https://www.korea.net/-news/news/NewsView.html?serial_no=20190529007/1559196593921.jpg");
+            item.setFirstImage2("https://www.korea.net/-news/news/NewsView.html?serial_no=20190529007/1559196593921.jpg"); // 샘플 이미지..인데 없는 링크라서 없는 이미지로 뜸
+
+            fakeResults.add(item);
+        }
+
+        //TODO
+        // 데이터 가져오기
+         List<TouristSpotItem> searchResults = fakeResults;
+
+        // ListAdapter에 데이터를 전달하면 자동으로 UI가 갱신됨
+         searchedSpotAdapter.submitList(searchResults);
+
+        showSearchResultState();
     }
 
     // UI 상태 변경 메소드들
