@@ -1,5 +1,7 @@
 package com.example.gangwontripy.data.model;
 
+import java.util.Objects;
+
 public class TouristSpotItem {
     private String title;
     private String addr1;
@@ -30,4 +32,25 @@ public class TouristSpotItem {
     public void setMapy(String mapy) { this.mapy = mapy; }
     public void setContentId(String contentId) { this.contentId = contentId; }
     public void setModifiedTime(String modifiedTime) { this.modifiedTime = modifiedTime; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TouristSpotItem that = (TouristSpotItem) o;
+        return Objects.equals(title, that.title) &&
+                Objects.equals(addr1, that.addr1) &&
+                Objects.equals(addr2, that.addr2) &&
+                Objects.equals(firstImage, that.firstImage) &&
+                Objects.equals(firstImage2, that.firstImage2) &&
+                Objects.equals(mapx, that.mapx) &&
+                Objects.equals(mapy, that.mapy) &&
+                Objects.equals(contentId, that.contentId) &&
+                Objects.equals(modifiedTime, that.modifiedTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, addr1, addr2, firstImage, firstImage2, mapx, mapy, contentId, modifiedTime);
+    }
 }

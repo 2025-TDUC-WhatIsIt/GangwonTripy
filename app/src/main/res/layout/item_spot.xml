@@ -10,7 +10,7 @@
     <!-- 1. 왼쪽 큰 대표 이미지 -->
     <ImageView
         android:id="@+id/iv_main_image"
-        android:layout_width="140dp"
+        android:layout_width="200dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
         android:background="#FFEB3B"
