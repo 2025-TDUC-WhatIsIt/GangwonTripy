@@ -4,13 +4,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -35,6 +41,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HomeFragment extends Fragment {
+    // 뷰 교체용 멤버 변수
+    private ConstraintLayout defaultStateContainer;
+    private RecyclerView searchResultRecyclerView;
+    private ProgressBar loadingIndicator;
+    private EditText searchBar;
 
     // -------- 관광명소(ViewPager2) --------
     private ViewPager2 touristPager;
@@ -87,6 +98,29 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
+
+        // XML의 뷰들을 코드와 연결
+        // fragment_home.xml의 뷰와 container_main_screen.xml의 뷰 모두
+        defaultStateContainer = view.findViewById(R.id.default_state_container);
+        searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
+        loadingIndicator = view.findViewById(R.id.loading_indicator);
+        searchBar = view.findViewById(R.id.search_bar);
+
+        // 검색창에서 키보드 '검색' 버튼을 눌렀을 때의 동작 설정
+        searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    String query = v.getText().toString();
+                    if (!query.isEmpty()) {
+                        performSearch(query);
+                    }
+                    // 키보드 숨기기 로직 추가하면 좋음
+                    return true;
+                }
+                return false;
+            }
+        });
 
         // --- 전통시장 섹션: 그대로 ---
         RecyclerView marketRecyclerView = view.findViewById(R.id.recycler_view_market);
@@ -152,6 +186,41 @@ public class HomeFragment extends Fragment {
         // --- 데이터 로드 ---
         fetchAllFestivals(festivalAdapter); // 축제
         fetchAllRegions();                  // 관광명소(횡성+인제+홍천)
+    }
+
+    // 실제 검색 로직 수행 (지금은 가짜 데이터로 테스트)
+    private void performSearch(String query) {
+        // 1. UI를 '로딩 상태'로 변경
+        showLoadingState();
+
+        // 2. (가짜) 2초 딜레이 후 검색 결과 보여주기
+        //    실제로는 여기서 네트워크 API를 호출합니다.
+        new android.os.Handler().postDelayed(() -> {
+            // TODO: 검색 결과를 가져와서 RecyclerView 어댑터에 데이터 설정
+            // searchResultAdapter.submitList(results);
+
+            // 3. UI를 '검색 결과 상태'로 변경
+            showSearchResultState();
+        }, 2000); // 2초 딜레이
+    }
+
+    // UI 상태 변경 메소드들
+    private void showDefaultState() {
+        defaultStateContainer.setVisibility(View.VISIBLE);
+        searchResultRecyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.GONE);
+    }
+
+    private void showLoadingState() {
+        defaultStateContainer.setVisibility(View.GONE);
+        searchResultRecyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    private void showSearchResultState() {
+        defaultStateContainer.setVisibility(View.GONE);
+        searchResultRecyclerView.setVisibility(View.VISIBLE);
+        loadingIndicator.setVisibility(View.GONE);
     }
 
     // ---------------- 축제 데이터 로드/바인딩 ----------------
