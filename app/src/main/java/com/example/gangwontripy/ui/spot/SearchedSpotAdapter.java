@@ -21,8 +21,9 @@ public class SearchedSpotAdapter extends ListAdapter<TouristSpotItem, SearchedSp
     private static final DiffUtil.ItemCallback<TouristSpotItem> DIFF_CALLBACK = new DiffUtil.ItemCallback<TouristSpotItem>() {
         @Override
         public boolean areItemsTheSame(@NonNull TouristSpotItem oldItem, @NonNull TouristSpotItem newItem) {
-            // contentId를 고유 식별자로 사용
-            return oldItem.getContentId().equals(newItem.getContentId());
+            String a = oldItem.getContentId() == null ? "" : oldItem.getContentId();
+            String b = newItem.getContentId() == null ? "" : newItem.getContentId();
+            return a.equals(b);
         }
 
         @Override
@@ -40,27 +41,24 @@ public class SearchedSpotAdapter extends ListAdapter<TouristSpotItem, SearchedSp
     @NonNull
     @Override
     public SpotViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_spot, parent, false);
-        return new SpotViewHolder(view);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_spot, parent, false);
+        return new SpotViewHolder(v, this); // ← 어댑터 참조 주입
     }
 
     @Override
     public void onBindViewHolder(@NonNull SpotViewHolder holder, int position) {
-        TouristSpotItem currentSpot = getItem(position);
-        holder.bind(currentSpot);
+        holder.bind(getItem(position));
     }
 
-    // ViewHolder 클래스: bind 메소드를 TouristSpotItem에 맞게 수정
     static class SpotViewHolder extends RecyclerView.ViewHolder {
-        private final ImageView mainImageView;
+        private final SearchedSpotAdapter owner; // ← 어댑터 참조
+        private final ImageView mainImageView, bookmarkImageView;
         private final GridLayout gridLayoutImages;
-        private final TextView spotNameTextView;
-        private final TextView addressTextView;
-        private final TextView operatingHoursTextView; // 이 뷰는 운영시간 정보가 없으므로 숨기거나 다른 정보로 대체
-        private final ImageView bookmarkImageView;
+        private final TextView spotNameTextView, addressTextView, operatingHoursTextView;
 
-        public SpotViewHolder(@NonNull View itemView) {
+        SpotViewHolder(@NonNull View itemView, SearchedSpotAdapter owner) {
             super(itemView);
+            this.owner = owner;
             mainImageView = itemView.findViewById(R.id.iv_main_image);
             gridLayoutImages = itemView.findViewById(R.id.grid_layout_images);
             spotNameTextView = itemView.findViewById(R.id.tv_spot_name);
@@ -69,39 +67,58 @@ public class SearchedSpotAdapter extends ListAdapter<TouristSpotItem, SearchedSp
             bookmarkImageView = itemView.findViewById(R.id.iv_bookmark);
         }
 
-        // bind 메소드를 현재 TouristSpotItem 모델에 맞게 수정
-        public void bind(TouristSpotItem spot) {
+        void bind(TouristSpotItem spot) {
+            android.util.Log.d("BookmarkClick", "clicked contentId=" + spot.getContentId());
             spotNameTextView.setText(spot.getTitle());
-            addressTextView.setText(spot.getAddr1()); // 주소는 addr1을 사용
-
-            // 운영 시간 정보가 없으므로, 해당 TextView를 숨기거나 비워둠
+            addressTextView.setText(spot.getAddr1());
             operatingHoursTextView.setVisibility(View.GONE);
-            // 또는 operatingHoursTextView.setText("");
 
-            // 대표 이미지 로드
+            String main = (spot.getFirstImage()==null||spot.getFirstImage().isEmpty())
+                    ? spot.getFirstImage2() : spot.getFirstImage();
+
             Glide.with(itemView.getContext())
-                    .load(spot.getFirstImage()) // firstImage를 대표 이미지로 사용
-                    .placeholder(R.color.gray)
-                    .error(R.drawable.image_placeholder) // 이미지 로드 실패 시 보여줄 이미지
+                    .load(main)
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.drawable.image_placeholder)
                     .into(mainImageView);
 
-            // 작은 이미지 4개 로드 (firstImage2와 다른 이미지들이 필요)
-            // 현재 모델에는 작은 이미지가 하나뿐이므로, 일단 firstImage2만 로드하는 예시
-            ImageView subImageView1 = (ImageView) gridLayoutImages.getChildAt(0);
-            if (spot.getFirstImage2() != null && !spot.getFirstImage2().isEmpty()) {
-                Glide.with(itemView.getContext())
-                        .load(spot.getFirstImage2())
-                        .placeholder(R.color.gray)
-                        .into(subImageView1);
-            } else {
-                // 이미지가 없으면 숨김
-                subImageView1.setVisibility(View.INVISIBLE);
-            }
+            // 서브 이미지 숨김
+            for (int i=0;i<4;i++) ((ImageView)gridLayoutImages.getChildAt(i)).setVisibility(View.INVISIBLE);
 
-            // 나머지 3개 작은 이미지는 일단 숨김 처리
-            ((ImageView) gridLayoutImages.getChildAt(1)).setVisibility(View.INVISIBLE);
-            ((ImageView) gridLayoutImages.getChildAt(2)).setVisibility(View.INVISIBLE);
-            ((ImageView) gridLayoutImages.getChildAt(3)).setVisibility(View.INVISIBLE);
+            // 현재 저장상태 반영
+            boolean saved = owner.savedIds.contains(spot.getContentId());
+            bookmarkImageView.setImageResource(saved ? R.drawable.ic_bookmark_filled
+                    : R.drawable.ic_bookmark_border);
+
+            bookmarkImageView.setOnClickListener(v -> {
+                if (owner.bookmarkClick == null) return;
+
+                String id = spot.getContentId();
+                if (id == null || id.isEmpty()) return;
+
+                boolean wasSaved = owner.savedIds.contains(id);
+                if (wasSaved) owner.savedIds.remove(id); else owner.savedIds.add(id);
+
+                int pos = getAdapterPosition();              // ← 여기만 변경
+                if (pos != RecyclerView.NO_POSITION) {
+                    owner.notifyItemChanged(pos);
+                }
+
+                owner.bookmarkClick.onClick(spot, !wasSaved);
+            });
+
         }
+    }
+    public interface OnBookmarkClick {
+        void onClick(TouristSpotItem item, boolean willSave); // true면 저장, false면 삭제
+    }
+
+    private OnBookmarkClick bookmarkClick;
+    private java.util.Set<String> savedIds = new java.util.HashSet<>(); // 이미 저장된 externalId들(contentId)
+
+    public void setOnBookmarkClick(OnBookmarkClick cb){ this.bookmarkClick = cb; }
+    public void setSavedIds(java.util.Set<String> ids){
+        this.savedIds = (ids == null) ? new java.util.HashSet<>() : ids;
+        notifyDataSetChanged();
     }
 }

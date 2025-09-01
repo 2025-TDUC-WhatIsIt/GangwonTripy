@@ -12,6 +12,87 @@ public class TouristSpotItem {
     private String mapy;
     private String contentId;
     private String modifiedTime;
+    private String cat1;
+    private String cat2;
+    private String cat3;
+    private String zipcode;
+    private String tel;
+    private String contentTypeId;
+    private String areaCode;
+    private String sigunguCode;
+    private String mlevel;
+
+    public String getSigunguCode() {
+        return sigunguCode;
+    }
+
+    public void setSigunguCode(String sigunguCode) {
+        this.sigunguCode = sigunguCode;
+    }
+
+    public String getMlevel() {
+        return mlevel;
+    }
+
+    public void setMlevel(String mLevel) {
+        this.mlevel = mLevel;
+    }
+
+    public String getCat1() {
+        return cat1;
+    }
+
+    public void setCat1(String cat1) {
+        this.cat1 = cat1;
+    }
+
+    public String getCat2() {
+        return cat2;
+    }
+
+    public void setCat2(String cat2) {
+        this.cat2 = cat2;
+    }
+
+    public String getCat3() {
+        return cat3;
+    }
+
+    public void setCat3(String cat3) {
+        this.cat3 = cat3;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getContentTypeId() {
+        return contentTypeId;
+    }
+
+    public void setContentTypeId(String contentTypeId) {
+        this.contentTypeId = contentTypeId;
+    }
+
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
 
     public String getTitle() { return title; }
     public String getAddr1() { return addr1; }

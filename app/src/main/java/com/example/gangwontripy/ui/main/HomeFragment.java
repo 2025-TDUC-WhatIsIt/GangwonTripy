@@ -27,6 +27,7 @@ import com.example.gangwontripy.R;
 import com.example.gangwontripy.data.api.ApiService;
 import com.example.gangwontripy.data.api.FestivalCallback;
 import com.example.gangwontripy.data.api.TourCallback;
+import com.example.gangwontripy.data.model.BookmarkRes;
 import com.example.gangwontripy.data.model.FestivalItem;
 import com.example.gangwontripy.data.model.MarketItem;
 import com.example.gangwontripy.data.model.TouristSpotItem;
@@ -59,6 +60,8 @@ public class HomeFragment extends Fragment {
 
     private final Handler autoHandler = new Handler(Looper.getMainLooper());
     private final long AUTO_DELAY_MS = 3000L;
+    // 북마크
+    private final java.util.Set<String> savedIds = new java.util.HashSet<>();
     private final Runnable autoRunnable = new Runnable() {
         @Override public void run() {
             if (touristPager != null && touristAdapter != null) {
@@ -202,37 +205,82 @@ public class HomeFragment extends Fragment {
         // RecyclerView에 LayoutManager와 Adapter 설정
         searchResultRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         searchResultRecyclerView.setAdapter(searchedSpotAdapter);
+        apiService.fetchBookmarks(new ApiService.Callback<List<BookmarkRes>>() {
+            @Override public void onSuccess(List<BookmarkRes> data) {
+                savedIds.clear();
+                for(BookmarkRes r: data) if (r.externalId != null) savedIds.add(r.externalId);
+                searchedSpotAdapter.setSavedIds(savedIds);
+            }
+            @Override public void onError(Exception e) { /* 무시 or 토스트 */ }
+        });
+
+        // 2) 아이콘 클릭 동작
+        searchedSpotAdapter.setOnBookmarkClick((item, willSave) -> {
+            if (willSave) {
+                apiService.addBookmarkFromTourItem(item, new ApiService.Callback<BookmarkRes>() {
+                    @Override public void onSuccess(BookmarkRes data) {
+                        if (item.getContentId() != null) savedIds.add(item.getContentId());
+                        searchedSpotAdapter.setSavedIds(savedIds);
+                    }
+                    @Override public void onError(Exception e) { /* 토스트 */ }
+                });
+            } else {
+                // 필요 시 삭제도 지원
+                apiService.removeBookmark("TOURAPI", item.getContentId(),
+                        new ApiService.Callback<Boolean>() {
+                            @Override public void onSuccess(Boolean ok) {
+                                savedIds.remove(item.getContentId());
+                                searchedSpotAdapter.setSavedIds(savedIds);
+                            }
+                            @Override public void onError(Exception e) { /* 토스트 */ }
+                        });
+            }
+        });
     }
 
     // 검색 로직을 수행하는 메소드
+// HomeFragment.java
     private void performSearch(String query) {
+        String q = (query == null) ? "" : query.trim();
+        if (q.isEmpty()) return;
+
         showLoadingState();
 
-        // 테스트를 위해 fakeResults 생성
-        List<TouristSpotItem> fakeResults = new ArrayList<>();
+        // 필요 시 특정 시군구만 필터하고 싶으면 두 번째 인자에 코드(예: 16=홍천) 넣기
+        String url = ApiService.buildSearchKeywordUrl(q, /*sigunguCode*/ null, /*page*/ 1, /*size*/ 30);
 
-        for (int i = 1; i <= 10; i++) {
-            TouristSpotItem item = new TouristSpotItem();
-            // TouristSpotItem의 setter 메소드를 사용하여 가짜 데이터를 채웁니다.
-            item.setContentId("ID_" + i); // 고유 ID는 필수입니다.
-            item.setTitle(query + " 검색 결과 " + i);
-            item.setAddr1("강원도 어딘가 멋진 곳 " + i);
-            // 이미지는 웹 URL을 직접 넣거나, drawable에 있는 샘플 이미지를 사용할 수 있습니다.
-            item.setFirstImage("https://www.korea.net/-news/news/NewsView.html?serial_no=20190529007/1559196593921.jpg");
-            item.setFirstImage2("https://www.korea.net/-news/news/NewsView.html?serial_no=20190529007/1559196593921.jpg"); // 샘플 이미지..인데 없는 링크라서 없는 이미지로 뜸
+        apiService.fetchTourSpotsAsync(url, new TourCallback() {
+            @Override public void onSuccess(List<TouristSpotItem> items) {
+                // 이미지가 있는 항목을 먼저 정렬(선택)
+                List<TouristSpotItem> withImg = new ArrayList<>();
+                List<TouristSpotItem> noImg  = new ArrayList<>();
+                if (items != null) {
+                    for (TouristSpotItem it : items) {
+                        String img = TextUtils.isEmpty(it.getFirstImage()) ? it.getFirstImage2() : it.getFirstImage();
+                        if (TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
+                    }
+                    withImg.addAll(noImg);
+                }
+                searchedSpotAdapter.submitList(withImg);
+                showSearchResultState();
 
-            fakeResults.add(item);
-        }
-
-        //TODO
-        // 데이터 가져오기
-         List<TouristSpotItem> searchResults = fakeResults;
-
-        // ListAdapter에 데이터를 전달하면 자동으로 UI가 갱신됨
-         searchedSpotAdapter.submitList(searchResults);
-
-        showSearchResultState();
+                // (선택) 키보드 숨기기
+                View v = getView();
+                if (v != null) {
+                    v.clearFocus();
+                    android.view.inputmethod.InputMethodManager imm =
+                            (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+            @Override public void onError(Exception e) {
+                // 사용자에게 에러 알림 (토스트/스낵바 등)
+                android.widget.Toast.makeText(requireContext(), "검색 실패: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                showDefaultState();
+            }
+        });
     }
+
 
     // UI 상태 변경 메소드들
     private void showDefaultState() {
