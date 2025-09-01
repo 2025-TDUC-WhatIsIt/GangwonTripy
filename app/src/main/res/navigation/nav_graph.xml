@@ -18,10 +18,10 @@
         tools:layout="@layout/fragment_directions"/>
 
     <fragment
-        android:id="@+id/rewardFragment"
-        android:name="com.example.gangwontripy.ui.reward.RewardFragment"
-        android:label="fragment_reward"
-        tools:layout="@layout/fragment_reward"/>
+        android:id="@+id/bookmarkFragment"
+        android:name="com.example.gangwontripy.ui.bookmark.BookmarkFragment"
+        android:label="fragment_bookmark"
+        tools:layout="@layout/fragment_recycler_only" />
 
     <fragment
         android:id="@+id/myPageFragment"
