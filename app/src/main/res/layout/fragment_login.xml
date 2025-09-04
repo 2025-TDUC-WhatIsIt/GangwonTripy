@@ -22,6 +22,7 @@
         android:hint="아이디"
         android:inputType="text"
         style="@style/CustomEditTextStyle"
+        android:background="@drawable/img_rectangle"
 
         android:layout_width="0dp"
         android:layout_height="30dp"

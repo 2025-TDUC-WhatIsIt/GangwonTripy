@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.gangwontripy.MainActivity;
@@ -69,5 +71,19 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            ActionBar actionBar = activity.getSupportActionBar();
+            if (actionBar != null) {
+                // LoginFragment에서는 제목을 비우거나 앱 이름으로 설정
+                actionBar.setTitle("");
+                // 첫 화면이므로 뒤로가기 버튼을 숨깁니다.
+                actionBar.setDisplayHomeAsUpEnabled(false);
+            }
+        }
+    }
 }
