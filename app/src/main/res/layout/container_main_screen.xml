@@ -190,7 +190,7 @@
 
             </LinearLayout>
 
-            <!-- 맛집을 추천해드릴게요! -->
+            <!-- 지나친 관광 명소! -->
             <TextView
                 android:id="@+id/text_recommend_restaurant"
                 android:layout_width="wrap_content"
