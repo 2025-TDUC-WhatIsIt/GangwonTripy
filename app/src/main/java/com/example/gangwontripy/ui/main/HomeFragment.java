@@ -39,6 +39,7 @@ import com.example.gangwontripy.ui.spot.SearchedSpotAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -239,46 +240,91 @@ public class HomeFragment extends Fragment {
     }
 
     // 검색 로직을 수행하는 메소드
-// HomeFragment.java
+    private static final int[] TARGET_SIGUNGU = {18, 16, 10};
+
     private void performSearch(String query) {
         String q = (query == null) ? "" : query.trim();
         if (q.isEmpty()) return;
 
         showLoadingState();
 
-        // 필요 시 특정 시군구만 필터하고 싶으면 두 번째 인자에 코드(예: 16=홍천) 넣기
-        String url = ApiService.buildSearchKeywordUrl(q, /*sigunguCode*/ null, /*page*/ 1, /*size*/ 30);
+        // 모든 호출의 결과를 모을 리스트(스레드 안전)
+        List<TouristSpotItem> aggregate = Collections.synchronizedList(new ArrayList<>());
+        AtomicInteger pending = new AtomicInteger(TARGET_SIGUNGU.length);
+        List<Exception> errors = Collections.synchronizedList(new ArrayList<>());
 
-        apiService.fetchTourSpotsAsync(url, new TourCallback() {
-            @Override public void onSuccess(List<TouristSpotItem> items) {
-                // 이미지가 있는 항목을 먼저 정렬(선택)
-                List<TouristSpotItem> withImg = new ArrayList<>();
-                List<TouristSpotItem> noImg  = new ArrayList<>();
-                if (items != null) {
-                    for (TouristSpotItem it : items) {
-                        String img = TextUtils.isEmpty(it.getFirstImage()) ? it.getFirstImage2() : it.getFirstImage();
-                        if (TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
+        for (int code : TARGET_SIGUNGU) {
+            String url = ApiService.buildSearchKeywordUrl(q, /*sigunguCode*/ code, /*page*/ 1, /*size*/ 30);
+
+            apiService.fetchTourSpotsAsync(url, new TourCallback() {
+                @Override public void onSuccess(List<TouristSpotItem> items) {
+                    if (items != null) aggregate.addAll(items);
+                    done();
+                }
+
+                @Override public void onError(Exception e) {
+                    errors.add(e);
+                    done();
+                }
+
+                private void done() {
+                    if (pending.decrementAndGet() == 0) {
+                        // 3개 지역 응답 모두 끝난 시점에 한 번만 UI 반영
+                        requireActivity().runOnUiThread(() -> {
+                            // (선택) contentId 기준 중복 제거
+                            List<TouristSpotItem> unique = dedupByContentId(aggregate);
+
+                            // 이미지 있는 항목 먼저 오게 재정렬 (기존 로직 유지)
+                            List<TouristSpotItem> withImg = new ArrayList<>();
+                            List<TouristSpotItem> noImg  = new ArrayList<>();
+                            for (TouristSpotItem it : unique) {
+                                String img = android.text.TextUtils.isEmpty(it.getFirstImage())
+                                        ? it.getFirstImage2() : it.getFirstImage();
+                                if (android.text.TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
+                            }
+                            withImg.addAll(noImg);
+
+                            searchedSpotAdapter.submitList(withImg);
+                            showSearchResultState();
+
+                            // (선택) 키보드 숨기기
+                            View v = getView();
+                            if (v != null) {
+                                v.clearFocus();
+                                android.view.inputmethod.InputMethodManager imm =
+                                        (android.view.inputmethod.InputMethodManager) requireContext()
+                                                .getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                            }
+
+                            if (withImg.isEmpty()) {
+                                android.widget.Toast.makeText(requireContext(), "검색 결과가 없습니다.", android.widget.Toast.LENGTH_SHORT).show();
+                            } else if (!errors.isEmpty()) {
+                                android.widget.Toast.makeText(requireContext(), "일부 지역 조회에 실패하여 일부 결과만 표시합니다.", android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
-                    withImg.addAll(noImg);
                 }
-                searchedSpotAdapter.submitList(withImg);
-                showSearchResultState();
+            });
+        }
+    }
 
-                // (선택) 키보드 숨기기
-                View v = getView();
-                if (v != null) {
-                    v.clearFocus();
-                    android.view.inputmethod.InputMethodManager imm =
-                            (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
-            }
-            @Override public void onError(Exception e) {
-                // 사용자에게 에러 알림 (토스트/스낵바 등)
-                android.widget.Toast.makeText(requireContext(), "검색 실패: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
-                showDefaultState();
-            }
-        });
+    private List<TouristSpotItem> dedupByContentId(List<TouristSpotItem> items) {
+        if (items == null) return Collections.emptyList();
+        // contentId가 가장 신뢰도 높음. 없다면 title+addr1로 보조 키 생성
+        LinkedHashMap<String, TouristSpotItem> map = new LinkedHashMap<>();
+        for (TouristSpotItem it : items) {
+            String key = null;
+            try {
+                String cid = (it.getContentId() != null) ? String.valueOf(it.getContentId()) : null;
+                key = (cid != null && !cid.isEmpty())
+                        ? cid
+                        : (String.valueOf(it.getTitle()) + "|" + String.valueOf(it.getAddr1()));
+            } catch (Exception ignore) {}
+            if (key == null) key = String.valueOf(it.hashCode());
+            map.putIfAbsent(key, it);
+        }
+        return new ArrayList<>(map.values());
     }
 
 
