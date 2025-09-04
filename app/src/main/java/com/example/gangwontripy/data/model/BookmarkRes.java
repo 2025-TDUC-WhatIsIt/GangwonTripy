@@ -13,5 +13,6 @@ public class BookmarkRes {
     public String createdAt;
     public Double lat;
     public Double lng;
+    public String sigunguCode;
     public Map<String,Object> snapshotJson;
 }

@@ -12,8 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.VH> {
+    public interface OnBookmarkActionListener {
+        void onUnbookmark(BookmarkRes item, int position);
+    }
     private final List<BookmarkRes> data = new ArrayList<>();
-
+    private final OnBookmarkActionListener actionListener;
+    public BookmarkAdapter(OnBookmarkActionListener listener) {
+        this.actionListener = listener;
+    }
     public void submitList(List<BookmarkRes> list){
         data.clear();
         if (list != null) data.addAll(list);
@@ -22,7 +28,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.VH> {
 
     @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int v) {
         View view = LayoutInflater.from(p.getContext()).inflate(R.layout.item_spot, p, false);
-        return new VH(view);
+        return new VH(view, actionListener);
     }
     @Override public void onBindViewHolder(@NonNull VH h, int pos) { h.bind(data.get(pos)); }
     @Override public int getItemCount() { return data.size(); }
@@ -32,8 +38,12 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.VH> {
         GridLayout grid;
         TextView name, addr, hours;
 
-        VH(@NonNull View v){
+        private final OnBookmarkActionListener listener;
+        private boolean removing = false;
+
+        VH(@NonNull View v, OnBookmarkActionListener l){
             super(v);
+            listener = l;
             main = v.findViewById(R.id.iv_main_image);
             grid = v.findViewById(R.id.grid_layout_images);
             sub1 = (ImageView) grid.getChildAt(0);
@@ -60,7 +70,18 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.VH> {
             sub3.setVisibility(View.INVISIBLE);
             sub4.setVisibility(View.INVISIBLE);
 
-            bookmarkIcon.setImageResource(R.drawable.ic_bookmark_filled);
+            bookmarkIcon.setImageResource(R.drawable.ic_bookmark_filled);bookmarkIcon.setAlpha(removing ? 0.5f : 1f);
+            bookmarkIcon.setEnabled(!removing);
+
+            bookmarkIcon.setOnClickListener(v -> {
+                if (removing) return;
+                int pos = getAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION) return;
+                removing = true;
+                bookmarkIcon.setAlpha(0.5f);
+                bookmarkIcon.setEnabled(false);
+                if (listener != null) listener.onUnbookmark(b, pos);
+            });
         }
     }
 }

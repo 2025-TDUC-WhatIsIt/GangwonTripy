@@ -124,6 +124,24 @@ public class ApiService {
                                 current.setContentId(parser.nextText());
                             } else if ("modifiedtime".equalsIgnoreCase(tagName)) {
                                 current.setModifiedTime(parser.nextText());
+                            } else if ("tel".equalsIgnoreCase(tagName)) {
+                                current.setTel(parser.nextText());
+                            } else if ("zipcode".equalsIgnoreCase(tagName)) {
+                                current.setZipcode(parser.nextText());
+                            } else if ("areacode".equalsIgnoreCase(tagName)) {
+                                current.setAreaCode(parser.nextText());
+                            } else if ("sigungucode".equalsIgnoreCase(tagName)) {
+                                current.setSigunguCode(parser.nextText()); // ← 문자열로 들어오니 String으로 받아둬도 OK
+                            } else if ("contenttypeid".equalsIgnoreCase(tagName)) {
+                                current.setContentTypeId(parser.nextText());
+                            } else if ("cat1".equalsIgnoreCase(tagName)) {
+                                current.setCat1(parser.nextText());
+                            } else if ("cat2".equalsIgnoreCase(tagName)) {
+                                current.setCat2(parser.nextText());
+                            } else if ("cat3".equalsIgnoreCase(tagName)) {
+                                current.setCat3(parser.nextText());
+                            } else if ("mlevel".equalsIgnoreCase(tagName)) {
+                                current.setMlevel(parser.nextText());
                             }
                         }
                         break;
@@ -309,6 +327,8 @@ public class ApiService {
         r.createdAt = o.optString("createdAt", null);
         if (o.has("lat")) r.lat = o.optDouble("lat");
         if (o.has("lng")) r.lng = o.optDouble("lng");
+        if (o.has("sigunguCode")) r.sigunguCode = o.optString("sigunguCode");
+        else if (o.has("sigungucode")) r.sigunguCode = o.optString("sigungucode");
         return r;
     }
 
@@ -339,6 +359,8 @@ public class ApiService {
                         r.createdAt = o.optString("createdAt", null);
                         if (o.has("lat")) r.lat = o.optDouble("lat");
                         if (o.has("lng")) r.lng = o.optDouble("lng");
+                        if (o.has("sigunguCode")) r.sigunguCode = o.optString("sigunguCode");
+                        else if (o.has("sigungucode")) r.sigunguCode = o.optString("sigungucode");
                         list.add(r);
                     }
                     mainHandler.post(() -> cb.onSuccess(list));
