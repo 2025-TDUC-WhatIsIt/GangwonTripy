@@ -18,7 +18,7 @@ import java.util.Objects;
 // BookmarkFragment.java
 // ui/bookmark/BookmarkFragment.java
 public class BookmarkFragment extends Fragment {
-    private final ApiService api = new ApiService();
+    private ApiService api;
     private BookmarkAdapter adapter;
     private final List<BookmarkRes> full = new ArrayList<>();
 
@@ -36,6 +36,7 @@ public class BookmarkFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
+        api = new ApiService(requireContext());
         RecyclerView rv = v.findViewById(R.id.recycler);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
