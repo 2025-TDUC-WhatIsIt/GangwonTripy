@@ -54,7 +54,7 @@ public class QrScanActivity extends AppCompatActivity {
     private ExecutorService analyzerExecutor;
     private final AtomicBoolean analyzing = new AtomicBoolean(false); // ✅ 동시 처리 방지
     private volatile boolean handled = false;
-    private final long userId = SessionManager.getInstance(this).getUserId();
+    private long userId;
 
     private final ActivityResultLauncher<String> camPerm =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(),
@@ -63,7 +63,7 @@ public class QrScanActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_scan_floating);
-
+        userId = SessionManager.getInstance(getApplication()).getUserId();
         previewView = findViewById(R.id.preview);
         findViewById(R.id.btnClose).setOnClickListener(v -> finish());
 
@@ -110,15 +110,13 @@ public class QrScanActivity extends AppCompatActivity {
                 Log.d(TAG, "Camera started (aspect=4:3, rotation=" + rotation + ")");
             } catch (Exception e) {
                 Log.e(TAG, "Camera start error", e);
-                show("카메라 오류: " + e.getMessage());
-                finish();
+                showAndFinish("카메라 오류: " + e.getMessage());
             }
         }, ContextCompat.getMainExecutor(this));
     }
 
     @OptIn(markerClass = ExperimentalGetImage.class)
     private void analyze(@NonNull ImageProxy ip) {
-        // 이미 처리 중이면 최신 프레임만 유지하고 바로 닫음
         if (!analyzing.compareAndSet(false, true)) {
             ip.close();
             return;
@@ -158,45 +156,57 @@ public class QrScanActivity extends AppCompatActivity {
                             VisitApi.VisitClaimRequest body = new VisitApi.VisitClaimRequest(token, null, null);
                             ApiClient.visitApi().claim(userId, body).enqueue(new Callback<VisitApi.VisitClaimResponse>() {
                                 @Override public void onResponse(Call<VisitApi.VisitClaimResponse> call, Response<VisitApi.VisitClaimResponse> res) {
-                                    String msg = (res.isSuccessful() && res.body()!=null) ? res.body().message : "서버 오류";
-                                    Log.d(TAG, "Claim response: " + msg);
-                                    show(msg);
-                                    finish();
+                                    String msg;
+                                    if (res.isSuccessful() && res.body()!=null) {
+                                        msg = res.body().message;
+                                        Log.d(TAG, "Claim response 200: " + msg);
+                                    } else {
+                                        String err = null;
+                                        try { err = res.errorBody()!=null ? res.errorBody().string() : null; } catch (Exception ignore) {}
+                                        Log.w(TAG, "Claim response " + res.code() + " err=" + err);
+                                        msg = "서버 오류";
+                                    }
+
+                                    // ❌ show() 후 즉시 finish() 호출 금지
+                                    // show(msg); finish();
+
+                                    // ✅ 다이얼로그의 확인 버튼에서 종료
+                                    showAndFinish(msg);
                                 }
+
                                 @Override public void onFailure(Call<VisitApi.VisitClaimResponse> call, Throwable t) {
                                     Log.e(TAG, "Claim failure", t);
-                                    show("네트워크 오류: " + t.getMessage());
-                                    finish();
+                                    showAndFinish("네트워크 오류: " + t.getMessage());
                                 }
                             });
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // ❗️여기서도 닫지 말고 onComplete에서 통합 처리
                         Log.e(TAG, "MLKit process failure", e);
                     })
                     .addOnCompleteListener(t -> {
-                        // ✅ 항상 마지막에 프레임 닫고 락 해제
                         analyzing.set(false);
                         try { ip.close(); } catch (Exception ignore) {}
                     });
 
         } catch (Throwable t) {
-            // 예외 시에도 확실히 닫고 락 해제
             Log.e(TAG, "Analyzer error", t);
             analyzing.set(false);
             try { ip.close(); } catch (Exception ignore) {}
         }
     }
 
-    private void show(String msg){
-        runOnUiThread(() ->
-                new AlertDialog.Builder(this)
-                        .setTitle("QR 스캔")
-                        .setMessage(msg)
-                        .setPositiveButton("확인",(d,w)->{})
-                        .show()
-        );
+    // ✅ 확인 누르면 그때 종료
+    private void showAndFinish(String msg){
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            new AlertDialog.Builder(this)
+                    .setTitle("QR 스캔")
+                    .setMessage(msg)
+                    .setCancelable(false)
+                    .setPositiveButton("확인",(d,w)-> finish())
+                    .show();
+        });
     }
 
     @Override protected void onDestroy() {
