@@ -4,8 +4,12 @@
     package="com.example.gangwontripy">
 
     <!-- ✅ 권한은 manifest 최상단에 -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -39,7 +43,9 @@
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".ui.mypage.QrScanActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

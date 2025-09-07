@@ -57,5 +57,28 @@
         <include layout="@layout/container_main_screen" />
 
     </androidx.core.widget.NestedScrollView>
+    <!-- 우측 하단 플로팅 카메라 박스 -->
+    <!-- 우측 하단 플로팅 카메라 박스 -->
+    <FrameLayout
+        android:id="@+id/qrFab"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_floating_camera"
+        android:elevation="12dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/btnCam"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_cam_24"
+            android:contentDescription="@string/app_name"/>
+    </FrameLayout>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,22 +1,40 @@
 package com.example.gangwontripy.ui.main;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView; // ✅ 추가
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
+import androidx.camera.core.AspectRatio;          // ✅ 추가
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -24,9 +42,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.data.api.ApiClient;
 import com.example.gangwontripy.data.api.ApiService;
 import com.example.gangwontripy.data.api.FestivalCallback;
 import com.example.gangwontripy.data.api.TourCallback;
+import com.example.gangwontripy.data.api.VisitApi;
 import com.example.gangwontripy.data.model.BookmarkRes;
 import com.example.gangwontripy.data.model.FestivalItem;
 import com.example.gangwontripy.data.model.MarketItem;
@@ -34,7 +54,13 @@ import com.example.gangwontripy.data.model.TouristSpotItem;
 import com.example.gangwontripy.ui.main.home.FestivalAdapter;
 import com.example.gangwontripy.ui.main.home.MarketAdapter;
 import com.example.gangwontripy.ui.main.home.TouristSpotPagerAdapter;
+import com.example.gangwontripy.ui.mypage.QrScanActivity;
 import com.example.gangwontripy.ui.spot.SearchedSpotAdapter;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.barcode.common.Barcode;
+import com.google.mlkit.vision.common.InputImage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +68,10 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
     // 뷰 교체용 멤버 변수
@@ -76,6 +106,14 @@ public class HomeFragment extends Fragment {
         }
     };
 
+    private final ActivityResultLauncher<String> cameraPermForScanner =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) openQrScanner();
+                else android.widget.Toast.makeText(requireContext(), "카메라 권한이 필요합니다.", android.widget.Toast.LENGTH_SHORT).show();
+            });
+    private void openQrScanner() {
+        startActivity(new Intent(requireContext(), QrScanActivity.class));
+    }
     // -------- 축제(RecyclerView+Snap) --------
     private RecyclerView festivalRv;
     private FestivalAdapter festivalAdapter;
@@ -108,32 +146,26 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // XML의 뷰들을 코드와 연결
-        // fragment_home.xml의 뷰와 container_main_screen.xml의 뷰 모두
         defaultStateContainer = view.findViewById(R.id.default_state_container);
         searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
         searchBar = view.findViewById(R.id.search_bar);
-        searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
 
         setupRecyclerView();
 
-        // 검색창에서 키보드 '검색' 버튼을 눌렀을 때의 동작 설정
-        searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    String query = v.getText().toString();
-                    if (!query.isEmpty()) {
-                        performSearch(query);
-                    }
-                    // 키보드 숨기기 로직 추가하면 좋음
-                    return true;
+        // 검색창 동작
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = v.getText().toString();
+                if (!query.isEmpty()) {
+                    performSearch(query);
                 }
-                return false;
+                return true;
             }
+            return false;
         });
 
-        // --- 전통시장 섹션: 그대로 ---
+        // --- 전통시장 섹션 ---
         RecyclerView marketRecyclerView = view.findViewById(R.id.recycler_view_market);
         List<MarketItem> marketDataList = new ArrayList<>();
         marketDataList.add(new MarketItem("강릉중앙시장", R.drawable.img_rectangle));
@@ -196,14 +228,24 @@ public class HomeFragment extends Fragment {
 
         // --- 데이터 로드 ---
         fetchAllFestivals(festivalAdapter); // 축제
-        fetchAllRegions();                  // 관광명소(횡성+인제+홍천)
+        fetchAllRegions();                  // 관광명소
+
+        // ----- 플로팅 카메라 셋업 -----
+        View qrFab = view.findViewById(R.id.qrFab);
+        if (qrFab != null) {
+            qrFab.setOnClickListener(v -> {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    openQrScanner();
+                } else {
+                    cameraPermForScanner.launch(Manifest.permission.CAMERA);
+                }
+            });
+        }
     }
 
     private void setupRecyclerView() {
-        // 어댑터 인스턴스 생성
         searchedSpotAdapter = new SearchedSpotAdapter();
-
-        // RecyclerView에 LayoutManager와 Adapter 설정
         searchResultRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         searchResultRecyclerView.setAdapter(searchedSpotAdapter);
         apiService.fetchBookmarks(new ApiService.Callback<List<BookmarkRes>>() {
@@ -212,10 +254,9 @@ public class HomeFragment extends Fragment {
                 for(BookmarkRes r: data) if (r.externalId != null) savedIds.add(r.externalId);
                 searchedSpotAdapter.setSavedIds(savedIds);
             }
-            @Override public void onError(Exception e) { /* 무시 or 토스트 */ }
+            @Override public void onError(Exception e) { }
         });
 
-        // 2) 아이콘 클릭 동작
         searchedSpotAdapter.setOnBookmarkClick((item, willSave) -> {
             if (willSave) {
                 apiService.addBookmarkFromTourItem(item, new ApiService.Callback<BookmarkRes>() {
@@ -223,23 +264,22 @@ public class HomeFragment extends Fragment {
                         if (item.getContentId() != null) savedIds.add(item.getContentId());
                         searchedSpotAdapter.setSavedIds(savedIds);
                     }
-                    @Override public void onError(Exception e) { /* 토스트 */ }
+                    @Override public void onError(Exception e) { }
                 });
             } else {
-                // 필요 시 삭제도 지원
                 apiService.removeBookmark("TOURAPI", item.getContentId(),
                         new ApiService.Callback<Boolean>() {
                             @Override public void onSuccess(Boolean ok) {
                                 savedIds.remove(item.getContentId());
                                 searchedSpotAdapter.setSavedIds(savedIds);
                             }
-                            @Override public void onError(Exception e) { /* 토스트 */ }
+                            @Override public void onError(Exception e) { }
                         });
             }
         });
     }
 
-    // 검색 로직을 수행하는 메소드
+    // 검색 로직
     private static final int[] TARGET_SIGUNGU = {18, 16, 10};
 
     private void performSearch(String query) {
@@ -248,33 +288,27 @@ public class HomeFragment extends Fragment {
 
         showLoadingState();
 
-        // 모든 호출의 결과를 모을 리스트(스레드 안전)
         List<TouristSpotItem> aggregate = Collections.synchronizedList(new ArrayList<>());
         AtomicInteger pending = new AtomicInteger(TARGET_SIGUNGU.length);
         List<Exception> errors = Collections.synchronizedList(new ArrayList<>());
 
         for (int code : TARGET_SIGUNGU) {
-            String url = ApiService.buildSearchKeywordUrl(q, /*sigunguCode*/ code, /*page*/ 1, /*size*/ 30);
+            String url = ApiService.buildSearchKeywordUrl(q, code, 1, 30);
 
             apiService.fetchTourSpotsAsync(url, new TourCallback() {
                 @Override public void onSuccess(List<TouristSpotItem> items) {
                     if (items != null) aggregate.addAll(items);
                     done();
                 }
-
                 @Override public void onError(Exception e) {
                     errors.add(e);
                     done();
                 }
-
                 private void done() {
                     if (pending.decrementAndGet() == 0) {
-                        // 3개 지역 응답 모두 끝난 시점에 한 번만 UI 반영
                         requireActivity().runOnUiThread(() -> {
-                            // (선택) contentId 기준 중복 제거
                             List<TouristSpotItem> unique = dedupByContentId(aggregate);
 
-                            // 이미지 있는 항목 먼저 오게 재정렬 (기존 로직 유지)
                             List<TouristSpotItem> withImg = new ArrayList<>();
                             List<TouristSpotItem> noImg  = new ArrayList<>();
                             for (TouristSpotItem it : unique) {
@@ -287,7 +321,6 @@ public class HomeFragment extends Fragment {
                             searchedSpotAdapter.submitList(withImg);
                             showSearchResultState();
 
-                            // (선택) 키보드 숨기기
                             View v = getView();
                             if (v != null) {
                                 v.clearFocus();
@@ -311,7 +344,6 @@ public class HomeFragment extends Fragment {
 
     private List<TouristSpotItem> dedupByContentId(List<TouristSpotItem> items) {
         if (items == null) return Collections.emptyList();
-        // contentId가 가장 신뢰도 높음. 없다면 title+addr1로 보조 키 생성
         LinkedHashMap<String, TouristSpotItem> map = new LinkedHashMap<>();
         for (TouristSpotItem it : items) {
             String key = null;
@@ -327,27 +359,24 @@ public class HomeFragment extends Fragment {
         return new ArrayList<>(map.values());
     }
 
-
-    // UI 상태 변경 메소드들
+    // UI 상태
     private void showDefaultState() {
         defaultStateContainer.setVisibility(View.VISIBLE);
         searchResultRecyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.GONE);
     }
-
     private void showLoadingState() {
         defaultStateContainer.setVisibility(View.GONE);
         searchResultRecyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.VISIBLE);
     }
-
     private void showSearchResultState() {
         defaultStateContainer.setVisibility(View.GONE);
         searchResultRecyclerView.setVisibility(View.VISIBLE);
         loadingIndicator.setVisibility(View.GONE);
     }
 
-    // ---------------- 축제 데이터 로드/바인딩 ----------------
+    // 축제 데이터
     private void fetchAllFestivals(FestivalAdapter adapter) {
         List<FestivalItem> all = new ArrayList<>();
         AtomicInteger remain = new AtomicInteger(3);
@@ -362,15 +391,13 @@ public class HomeFragment extends Fragment {
             }
         };
 
-        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(18), cb); // 횡성
-        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(10), cb); // 인제
-        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(16), cb); // 홍천
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(18), cb);
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(10), cb);
+        apiService.fetchFestivalsAsync(ApiService.buildFestivalUrl(16), cb);
     }
 
     private void onAllFestivalsLoaded(List<FestivalItem> all, FestivalAdapter adapter) {
         if (all == null) all = new ArrayList<>();
-
-        // 중복 제거
         List<String> seen = new ArrayList<>();
         List<FestivalItem> dedup = new ArrayList<>();
         for (FestivalItem f : all) {
@@ -380,8 +407,6 @@ public class HomeFragment extends Fragment {
                 dedup.add(f);
             }
         }
-
-        // 시작일 오름차순(빈 값은 뒤로)
         Collections.sort(dedup, (a, b) -> {
             String sa = a.getEventStartDate() == null ? "" : a.getEventStartDate();
             String sb = b.getEventStartDate() == null ? "" : b.getEventStartDate();
@@ -390,17 +415,14 @@ public class HomeFragment extends Fragment {
             if (sb.isEmpty()) return -1;
             return sa.compareTo(sb);
         });
-
         adapter.submitList(dedup);
-
-        // 도트 & 자동 슬라이드 시작
         setupFestivalDots(adapter.getItemCount());
         int pos = getSnappedPosition(festivalRv, festivalSnapHelper);
         updateFestivalDots(pos == RecyclerView.NO_POSITION ? 0 : pos, adapter.getItemCount());
         festivalStartAutoSlideIfReady();
     }
 
-    // ---------------- 관광명소 데이터 로드/바인딩 ----------------
+    // 관광명소 데이터
     private void fetchAllRegions() {
         List<TouristSpotItem> all = new ArrayList<>();
         AtomicInteger remain = new AtomicInteger(3);
@@ -422,8 +444,6 @@ public class HomeFragment extends Fragment {
 
     private void onAllRegionLoaded(List<TouristSpotItem> all) {
         if (all.isEmpty()) return;
-
-        // 최신 수정일 내림차순
         Collections.sort(all, new Comparator<TouristSpotItem>() {
             @Override public int compare(TouristSpotItem o1, TouristSpotItem o2) {
                 String t1 = o1.getModifiedTime() == null ? "" : o1.getModifiedTime();
@@ -431,8 +451,6 @@ public class HomeFragment extends Fragment {
                 return t2.compareTo(t1);
             }
         });
-
-        // 이미지 있는 항목 우선
         List<TouristSpotItem> withImg = new ArrayList<>();
         List<TouristSpotItem> noImg  = new ArrayList<>();
         for (TouristSpotItem it : all) {
@@ -440,26 +458,20 @@ public class HomeFragment extends Fragment {
             if (TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
         }
         withImg.addAll(noImg);
-
         touristAdapter.submitList(withImg);
-
-        // 도트 & 자동 슬라이드
         setupTouristDots(touristAdapter.getRealCount());
         updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());
         startAutoSlideIfReady();
     }
 
-    // ---------------- 관광명소 도트 ----------------
+    // 관광명소 도트
     private void setupTouristDots(int total) {
         if (dotsTourist == null) return;
         dotsTourist.removeAllViews();
-
         int visibleDots = Math.min(total, MAX_DOTS);
         if (visibleDots == 0) return;
-
         int dotSizePx = dp(8);
         int dotMarginPx = dp(4);
-
         for (int i = 0; i < visibleDots; i++) {
             View dot = new View(requireContext());
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dotSizePx, dotSizePx);
@@ -472,39 +484,31 @@ public class HomeFragment extends Fragment {
 
     private void updateTouristDots(int position, int total) {
         if (dotsTourist == null || dotsTourist.getChildCount() == 0 || total == 0) return;
-
         int visible = Math.min(total, MAX_DOTS);
         int half = visible / 2; // 5 -> 2
         int start = position - half;
         if (start < 0) start = 0;
         if (start > total - visible) start = Math.max(0, total - visible);
-
         int center = position - start; // 0..visible-1
         boolean hasBefore = start > 0;
         boolean hasAfter  = (start + visible) < total;
-
         int SIZE_EDGE_MORE = dp(5);
         int SIZE_FAR       = dp(6);
         int SIZE_NEAR      = dp(8);
         int SIZE_CENTER    = dp(10);
-
         float ALPHA_EDGE_MORE = 0.50f;
         float ALPHA_FAR       = 0.70f;
         float ALPHA_NEAR      = 0.85f;
         float ALPHA_CENTER    = 1.00f;
-
         for (int i = 0; i < visible; i++) {
             View dot = dotsTourist.getChildAt(i);
             int absDist = Math.abs(i - center);
-
             int size; float alpha;
             if (absDist == 0) { size = SIZE_CENTER; alpha = ALPHA_CENTER; }
             else if (absDist == 1) { size = SIZE_NEAR; alpha = ALPHA_NEAR; }
             else { size = SIZE_FAR; alpha = ALPHA_FAR; }
-
             if (i == 0 && hasBefore) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
             if (i == visible - 1 && hasAfter) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
-
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) dot.getLayoutParams();
             lp.width = size; lp.height = size; dot.setLayoutParams(lp);
             dot.setAlpha(alpha);
@@ -513,17 +517,14 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // ---------------- 축제 도트 ----------------
+    // 축제 도트
     private void setupFestivalDots(int total) {
         if (dotsFestival == null) return;
         dotsFestival.removeAllViews();
-
         int visibleDots = Math.min(total, MAX_DOTS);
         if (visibleDots == 0) return;
-
         int dotSizePx = dp(8);
         int dotMarginPx = dp(4);
-
         for (int i = 0; i < visibleDots; i++) {
             View dot = new View(requireContext());
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dotSizePx, dotSizePx);
@@ -536,39 +537,31 @@ public class HomeFragment extends Fragment {
 
     private void updateFestivalDots(int position, int total) {
         if (dotsFestival == null || dotsFestival.getChildCount() == 0 || total == 0) return;
-
         int visible = Math.min(total, MAX_DOTS);
         int half = visible / 2;
         int start = position - half;
         if (start < 0) start = 0;
         if (start > total - visible) start = Math.max(0, total - visible);
-
         int center = position - start;
         boolean hasBefore = start > 0;
         boolean hasAfter  = (start + visible) < total;
-
         int SIZE_EDGE_MORE = dp(5);
         int SIZE_FAR       = dp(6);
         int SIZE_NEAR      = dp(8);
         int SIZE_CENTER    = dp(10);
-
         float ALPHA_EDGE_MORE = 0.50f;
         float ALPHA_FAR       = 0.70f;
         float ALPHA_NEAR      = 0.85f;
         float ALPHA_CENTER    = 1.00f;
-
         for (int i = 0; i < visible; i++) {
             View dot = dotsFestival.getChildAt(i);
             int absDist = Math.abs(i - center);
-
             int size; float alpha;
             if (absDist == 0) { size = SIZE_CENTER; alpha = ALPHA_CENTER; }
             else if (absDist == 1) { size = SIZE_NEAR; alpha = ALPHA_NEAR; }
             else { size = SIZE_FAR; alpha = ALPHA_FAR; }
-
             if (i == 0 && hasBefore) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
             if (i == visible - 1 && hasAfter) { size = Math.min(size, SIZE_EDGE_MORE); alpha = Math.min(alpha, ALPHA_EDGE_MORE); }
-
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) dot.getLayoutParams();
             lp.width = size; lp.height = size; dot.setLayoutParams(lp);
             dot.setAlpha(alpha);
@@ -577,7 +570,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // ---------------- 공통 유틸/생명주기 ----------------
+    // 공통 유틸/생명주기
     private int getSnappedPosition(RecyclerView rv, PagerSnapHelper helper) {
         if (rv == null || helper == null || rv.getLayoutManager() == null) return RecyclerView.NO_POSITION;
         View snap = helper.findSnapView(rv.getLayoutManager());
@@ -589,7 +582,6 @@ public class HomeFragment extends Fragment {
         return (int) (v * d + 0.5f);
     }
 
-    // 관광명소 자동 슬라이드
     private void startAutoSlideIfReady() {
         stopAutoSlide();
         if (touristAdapter != null && touristAdapter.getRealCount() > 1) {
@@ -605,7 +597,6 @@ public class HomeFragment extends Fragment {
 //        }
 //    }
 
-    // 축제 자동 슬라이드
     private void festivalStartAutoSlideIfReady() {
         festivalStopAutoSlide();
         if (festivalAdapter != null && festivalAdapter.getItemCount() > 1) {
