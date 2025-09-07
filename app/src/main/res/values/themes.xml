@@ -40,7 +40,7 @@
     </style>
 
     <style name="CustomEditTextStyle" parent="Widget.AppCompat.EditText">
-        <item name="android:background">@drawable/img_rectangle</item>
+        <item name="android:background">@android:color/transparent</item>
         <item name="android:imeOptions">actionSearch</item>
         <item name="maxLines">1</item>
 

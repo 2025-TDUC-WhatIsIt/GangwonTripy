@@ -27,6 +27,26 @@
         android:id="@+id/myPageFragment"
         android:name="com.example.gangwontripy.ui.mypage.MyPageFragment"
         android:label="fragment_my_page"
-        tools:layout="@layout/fragment_my_page_old"/>
+        tools:layout="@layout/fragment_my_page_old">
+        <action
+            android:id="@+id/action_myPageFragment_to_noticeFragment"
+            app:destination="@id/noticeFragment" />
+        <action
+            android:id="@+id/action_myPageFragment_to_faqFragment"
+            app:destination="@id/faqFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/noticeFragment"
+        android:name="com.example.gangwontripy.ui.notice.NoticeFragment"
+        android:label="공지사항"
+        tools:layout="@layout/fragment_notice"/>
+
+    <fragment
+        android:id="@+id/faqFragment"
+        android:name="com.example.gangwontripy.ui.faq.FaqFragment"
+        android:label="자주 묻는 질문"
+        tools:layout="@layout/fragment_faq" />
 
 </navigation>

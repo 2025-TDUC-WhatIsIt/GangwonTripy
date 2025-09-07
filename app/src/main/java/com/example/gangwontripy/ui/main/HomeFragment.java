@@ -591,6 +591,11 @@ public class HomeFragment extends Fragment {
     private void stopAutoSlide() {
         autoHandler.removeCallbacksAndMessages(null);
     }
+//    private void stopAutoSlide() {
+//        if (autoHandler != null){
+//            autoHandler.removeCallbacks(autoRunnable);
+//        }
+//    }
 
     private void festivalStartAutoSlideIfReady() {
         festivalStopAutoSlide();
@@ -601,6 +606,11 @@ public class HomeFragment extends Fragment {
     private void festivalStopAutoSlide() {
         festivalAutoHandler.removeCallbacksAndMessages(null);
     }
+//    private void festivalStopAutoSlide() {
+//        if (festivalAutoHandler != null){
+//            festivalAutoHandler.removeCallbacks(festivalAutoRunnable);
+//        }
+//    }
 
     @Override public void onResume() {
         super.onResume();
@@ -608,9 +618,9 @@ public class HomeFragment extends Fragment {
         festivalStartAutoSlideIfReady();
     }
     @Override public void onPause()  {
+        super.onPause();
         stopAutoSlide();
         festivalStopAutoSlide();
-        super.onPause();
     }
     @Override public void onDestroyView() {
         stopAutoSlide();
