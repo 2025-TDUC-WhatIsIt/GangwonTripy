@@ -134,7 +134,7 @@ public class HomeFragment extends Fragment {
         }
     };
 
-    private final ApiService apiService = new ApiService();
+    private ApiService apiService;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
@@ -144,7 +144,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
-
+        apiService = new ApiService(requireContext());
         // XML의 뷰들을 코드와 연결
         defaultStateContainer = view.findViewById(R.id.default_state_container);
         searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);

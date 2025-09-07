@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import android.util.Log;
 
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.core.SessionManager;
 import com.example.gangwontripy.data.api.ApiClient;
 import com.example.gangwontripy.data.api.VisitApi;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
@@ -53,7 +54,7 @@ public class QrScanActivity extends AppCompatActivity {
     private ExecutorService analyzerExecutor;
     private final AtomicBoolean analyzing = new AtomicBoolean(false); // ✅ 동시 처리 방지
     private volatile boolean handled = false;
-    private final long userId = 1L;
+    private final long userId = SessionManager.getInstance(this).getUserId();
 
     private final ActivityResultLauncher<String> camPerm =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(),

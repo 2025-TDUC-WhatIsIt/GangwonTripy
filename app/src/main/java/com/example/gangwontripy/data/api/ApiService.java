@@ -1,10 +1,12 @@
 package com.example.gangwontripy.data.api;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
+import com.example.gangwontripy.core.SessionManager;
 import com.example.gangwontripy.data.model.BookmarkRes;
 import com.example.gangwontripy.data.model.FestivalItem;
 import com.example.gangwontripy.data.model.TouristSpotItem;
@@ -26,13 +28,27 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class ApiService {
 
+    private final Context app; // ✅ Application Context 보관
+    public ApiService(Context context) {
+        this.app = context.getApplicationContext();
+    }
     // 공공데이터 서버가 아니라 스프링 서버를 베이스
     private static final String API_BASE = BuildConfig.API_BASE;
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private final OkHttpClient ok = new OkHttpClient();
-    // 앱에서 쓸 사용자 ID (임시 하드코딩 / 로그인 붙이면 교체)
-    private static final String USER_ID = "1";
 
+    public static class MyPageSummary {
+        public int badgeCount;
+        public int titleCount;
+        public int visitCount;
+        public String currentTitle;
+    }
+
+    private String userIdOrThrow() {
+        long uid = SessionManager.getInstance(app).getUserId();
+        if (uid <= 0) throw new IllegalStateException("로그인이 필요합니다.");
+        return String.valueOf(uid);
+    }
     // 서버 프록시 엔드포인트 사용
     public static String buildFestivalUrl(Integer sigunguCode) {
         String today = new SimpleDateFormat("yyyyMMdd", Locale.KOREA).format(new Date());
@@ -57,6 +73,33 @@ public class ApiService {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    public void fetchMyPageSummary(Callback<MyPageSummary> cb) {
+        executor.execute(() -> {
+            try {
+                Request req = new Request.Builder()
+                        .url(API_BASE + "/api/mypage/summary")  // ✅ 서버에 해당 엔드포인트만 만들어주면 끝
+                        .addHeader("X-User-Id", userIdOrThrow()) // ✅ 앞서 만든 메서드: 로그인 안되면 예외
+                        .get()
+                        .build();
+
+                try (Response resp = ok.newCall(req).execute()) {
+                    if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
+                    String body = resp.body().string();
+
+                    JSONObject o = new JSONObject(body);
+                    MyPageSummary s = new MyPageSummary();
+                    s.badgeCount = o.optInt("badgeCount", 0);
+                    s.titleCount = o.optInt("titleCount", 0);
+                    s.visitCount = o.optInt("visitCount", 0);
+                    s.currentTitle = o.optString("currentTitle", "없음");
+                    mainHandler.post(() -> cb.onSuccess(s));
+                }
+            } catch (Exception e) {
+                mainHandler.post(() -> cb.onError(e));
+            }
+        });
+    }
 
     public void fetchTourSpotsAsync(String url, TourCallback callback) {
         executor.execute(() -> {
@@ -294,7 +337,7 @@ public class ApiService {
 
                 Request req = new Request.Builder()
                         .url(API_BASE + "/api/bookmarks/tourapi")
-                        .addHeader("X-User-Id", USER_ID)
+                        .addHeader("X-User-Id", userIdOrThrow())
                         .post(RequestBody.create(body.toString(), JSON))
                         .build();
 
@@ -338,7 +381,7 @@ public class ApiService {
             try{
                 Request req = new Request.Builder()
                         .url(API_BASE + "/api/bookmarks")
-                        .addHeader("X-User-Id", USER_ID)
+                        .addHeader("X-User-Id", userIdOrThrow())
                         .get()
                         .build();
                 try(Response resp = ok.newCall(req).execute()){
@@ -377,7 +420,7 @@ public class ApiService {
             try{
                 Request req = new Request.Builder()
                         .url(API_BASE + "/api/bookmarks/" + provider + "/" + externalId)
-                        .addHeader("X-User-Id", USER_ID)
+                        .addHeader("X-User-Id", userIdOrThrow())
                         .delete()
                         .build();
                 try(Response resp = ok.newCall(req).execute()){
