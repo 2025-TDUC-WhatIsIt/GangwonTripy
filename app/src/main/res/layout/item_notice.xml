@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notice_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- 질문 영역 (항상 보임) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_notice_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="[시스템] 강원 Tripy는 어떤 앱인가요?"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_arrow"/>
+
+        <TextView
+            android:id="@+id/tv_notice_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2025.08.13"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_notice_title"/>
+
+        <ImageView
+            android:id="@+id/iv_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_chevron_down"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 답변 영역 (펼쳐졌을 때만 보임) -->
+    <TextView
+        android:id="@+id/tv_notice_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="여기에 답변 내용이 표시됩니다."
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:background="#F5F5F5"
+        android:visibility="gone" /> <!-- 처음에는 숨겨둠 -->
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>

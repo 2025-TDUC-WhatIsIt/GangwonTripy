@@ -18,6 +18,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.gangwontripy.R;
 import com.example.gangwontripy.ui.splash.SplashActivity;
 
+import org.w3c.dom.Text;
+
 public class MyPageFragment extends Fragment {
 
     @Nullable
@@ -33,12 +35,20 @@ public class MyPageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        TextView noticeTextView = view.findViewById(R.id.menu_notice);
         TextView faqTextView = view.findViewById(R.id.menu_faq);
         TextView logoutTextView = view.findViewById(R.id.menu_logout);
+
+        noticeTextView.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_noticeFragment);
+        });
+
         faqTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)
                     .navigate(R.id.action_myPageFragment_to_faqFragment);
         });
+
         logoutTextView.setOnClickListener(v -> {
             showLogoutDialog();
         });
