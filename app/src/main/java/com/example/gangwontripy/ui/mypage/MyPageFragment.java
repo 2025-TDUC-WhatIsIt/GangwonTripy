@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavHost;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.gangwontripy.R;
@@ -37,6 +38,8 @@ public class MyPageFragment extends Fragment {
 
         TextView noticeTextView = view.findViewById(R.id.menu_notice);
         TextView faqTextView = view.findViewById(R.id.menu_faq);
+        TextView termsTextView = view.findViewById(R.id.menu_terms);
+        TextView privacyTextView = view.findViewById(R.id.menu_privacy);
         TextView logoutTextView = view.findViewById(R.id.menu_logout);
 
         noticeTextView.setOnClickListener(v -> {
@@ -47,6 +50,20 @@ public class MyPageFragment extends Fragment {
         faqTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)
                     .navigate(R.id.action_myPageFragment_to_faqFragment);
+        });
+
+        termsTextView.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("document_type", "TERMS");
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_documentFragment, bundle);
+        });
+
+        privacyTextView.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("document_type", "PRIVACY");
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_documentFragment, bundle);
         });
 
         logoutTextView.setOnClickListener(v -> {

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +36,24 @@ public class FaqFragment extends Fragment {
 
         // 구분선 추가 (XML의 View 대신 이 방법을 사용하면 더 깔끔)
         // recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // 이 Fragment가 화면에 보일 때마다 툴바를 설정합니다.
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            ActionBar actionBar = activity.getSupportActionBar();
+            if (actionBar != null) {
+                // 1. 툴바 제목 설정
+                actionBar.setTitle("자주 묻는 질문");
+
+                // 2. 뒤로가기 버튼 표시 (NavigationUI가 자동으로 해주지만, 명시적으로 하는 것이 더 안전)
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        }
     }
 
     // 테스트를 위한 가짜 데이터 생성 메소드
