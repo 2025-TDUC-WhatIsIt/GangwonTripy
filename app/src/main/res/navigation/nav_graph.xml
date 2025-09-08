@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_myPageFragment_to_faqFragment"
             app:destination="@id/faqFragment" />
+        <action
+            android:id="@+id/action_myPageFragment_to_documentFragment"
+            app:destination="@id/documentFragment" />
 
     </fragment>
 
@@ -48,5 +51,15 @@
         android:name="com.example.gangwontripy.ui.faq.FaqFragment"
         android:label="자주 묻는 질문"
         tools:layout="@layout/fragment_faq" />
+
+    <fragment
+        android:id="@+id/documentFragment"
+        android:name="com.example.gangwontripy.ui.document.DocumentFragment"
+        android:label="문서 보기"
+        tools:layout="@layout/fragment_document">
+        <argument
+            android:name="document_type"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

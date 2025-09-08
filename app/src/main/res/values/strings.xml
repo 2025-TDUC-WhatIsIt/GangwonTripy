@@ -15,4 +15,7 @@
     <string name="my_page_list_text8">약관 및 정책</string>
     <string name="my_page_list_text9">개인정보 처리방침</string>
 
+    <string name="terms_content">약관 및 정책 본문 내용은 어쩌구 저쩌구 쏼라쏼라이다</string>
+    <string name="privacy_content">개인정보 처리방침 본문 내용은 이러쿵 저러쿵이다</string>
+
 </resources>

@@ -17,6 +17,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavHost;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.gangwontripy.R;
 import com.example.gangwontripy.core.SessionManager;
@@ -44,6 +46,35 @@ public class MyPageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
+
+        TextView noticeTextView = view.findViewById(R.id.menu_notice);
+        TextView faqTextView = view.findViewById(R.id.menu_faq);
+        TextView termsTextView = view.findViewById(R.id.menu_terms);
+        TextView privacyTextView = view.findViewById(R.id.menu_privacy);
+      
+        noticeTextView.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_noticeFragment);
+        });
+
+        faqTextView.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_faqFragment);
+        });
+      
+        termsTextView.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("document_type", "TERMS");
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_documentFragment, bundle);
+        });
+
+        privacyTextView.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("document_type", "PRIVACY");
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_documentFragment, bundle);
+        });
 
         // ✅ 뷰 바인딩
         imageProfile     = view.findViewById(R.id.image_profile);
