@@ -8,19 +8,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.gangwontripy.MainActivity;
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.data.api.ApiClient;
+import com.example.gangwontripy.data.model.LoginReq;
+import com.example.gangwontripy.data.model.LoginRes;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment {
+    private EditText etId, etPw;
 
     @Nullable
     @Override
@@ -33,57 +41,54 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        etId = view.findViewById(R.id.login_id);          // ← 레이아웃 ID에 맞게 수정
+        etPw = view.findViewById(R.id.login_pw);    // ← 레이아웃 ID에 맞게 수정
+
         Button loginButton = view.findViewById(R.id.login_btn);
         ImageButton kakaoLoginButton = view.findViewById(R.id.login_kakao);
         TextView registerButton = view.findViewById(R.id.register);
         TextView findAccountButton = view.findViewById(R.id.find_account);
         TextView inquiryButton = view.findViewById(R.id.inquiry);
 
-        // 로그인 버튼
-        loginButton.setOnClickListener(v -> {
-            // TODO 실제 아이디/비밀번호 확인 로직
+        loginButton.setOnClickListener(v -> doLogin());
 
-            if (getActivity() instanceof LoginActivity){
-                ((LoginActivity) getActivity()).onLoginSuccess();
-            }
-        });
-
-        // 카카오 로그인 버튼
         kakaoLoginButton.setOnClickListener(v -> {
-            // TODO 카카오로그인
+            // TODO: 카카오 로그인 연동
         });
 
-        // 회원가입
         registerButton.setOnClickListener(v -> {
             if (getActivity() instanceof LoginActivity){
                 ((LoginActivity) getActivity()).navigateToTerms();
             }
         });
-
-        // 계정찾기
-        findAccountButton.setOnClickListener(v -> {
-
-        });
-
-        // 문의하기
-        inquiryButton.setOnClickListener(v -> {
-
-        });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    private void doLogin() {
+        String id = etId != null ? etId.getText().toString().trim() : "";
+        String pw = etPw != null ? etPw.getText().toString().trim() : "";
 
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity != null) {
-            ActionBar actionBar = activity.getSupportActionBar();
-            if (actionBar != null) {
-                // LoginFragment에서는 제목을 비우거나 앱 이름으로 설정
-                actionBar.setTitle("");
-                // 첫 화면이므로 뒤로가기 버튼을 숨깁니다.
-                actionBar.setDisplayHomeAsUpEnabled(false);
-            }
+        if (id.isEmpty() || pw.isEmpty()) {
+            Toast.makeText(requireContext(), "아이디/비밀번호를 입력하세요.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        ApiClient.authApi().login(new LoginReq(id, pw)).enqueue(new Callback<LoginRes>() {
+            @Override
+            public void onResponse(Call<LoginRes> call, Response<LoginRes> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    LoginRes body = res.body();
+                    if (getActivity() instanceof LoginActivity) {
+                        ((LoginActivity) getActivity()).onLoginSuccess(body);
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "로그인 실패", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginRes> call, Throwable t) {
+                Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

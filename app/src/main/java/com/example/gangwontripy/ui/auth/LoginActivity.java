@@ -13,6 +13,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.gangwontripy.MainActivity;
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.core.SessionManager;
+import com.example.gangwontripy.data.model.LoginRes;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -20,7 +22,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+// 이미 로그인 상태면 메인으로 바로 이동
+        if (SessionManager.getInstance(this).isLoggedIn()) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
         Toolbar toolbar = findViewById(R.id.toolbar_login);
         setSupportActionBar(toolbar);
 
@@ -68,14 +77,12 @@ public class LoginActivity extends AppCompatActivity {
         return super.onSupportNavigateUp();
     }
 
-    public void onLoginSuccess() {
-        saveLoginState(true);
+    public void onLoginSuccess(LoginRes res) {
+        SessionManager.getInstance(this).saveLogin(res);
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-
-        // LoginActivity 종료
         finish();
     }
 

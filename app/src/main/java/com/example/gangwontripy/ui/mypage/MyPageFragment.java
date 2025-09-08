@@ -1,13 +1,17 @@
+// MyPageFragment.java
 package com.example.gangwontripy.ui.mypage;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,19 +21,26 @@ import androidx.navigation.NavHost;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.gangwontripy.R;
+import com.example.gangwontripy.core.SessionManager;
+import com.example.gangwontripy.data.api.ApiService;
 import com.example.gangwontripy.ui.splash.SplashActivity;
-
-import org.w3c.dom.Text;
+import com.bumptech.glide.Glide;
 
 public class MyPageFragment extends Fragment {
+
+    private TextView textBadgeCount;
+    private TextView textMyTitleCount;
+    private TextView textVisitLogCount;
+    private TextView textName;
+    private TextView textNickname;
+    private ImageView imageProfile;
+
+    private ApiService api;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
-        // 레이아웃 파일을 View 객체로 변환(inflate)
-        View view = inflater.inflate(R.layout.fragment_my_page, container, false);
-        // view 객체 반환 -> 시스템이 view를 화면에 그려줌
-        return view;
+        return inflater.inflate(R.layout.fragment_my_page, container, false);
     }
 
     @Override
@@ -40,8 +51,7 @@ public class MyPageFragment extends Fragment {
         TextView faqTextView = view.findViewById(R.id.menu_faq);
         TextView termsTextView = view.findViewById(R.id.menu_terms);
         TextView privacyTextView = view.findViewById(R.id.menu_privacy);
-        TextView logoutTextView = view.findViewById(R.id.menu_logout);
-
+      
         noticeTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)
                     .navigate(R.id.action_myPageFragment_to_noticeFragment);
@@ -51,7 +61,7 @@ public class MyPageFragment extends Fragment {
             NavHostFragment.findNavController(MyPageFragment.this)
                     .navigate(R.id.action_myPageFragment_to_faqFragment);
         });
-
+      
         termsTextView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("document_type", "TERMS");
@@ -66,36 +76,100 @@ public class MyPageFragment extends Fragment {
                     .navigate(R.id.action_myPageFragment_to_documentFragment, bundle);
         });
 
-        logoutTextView.setOnClickListener(v -> {
-            showLogoutDialog();
+        // ✅ 뷰 바인딩
+        imageProfile     = view.findViewById(R.id.image_profile);
+        textName         = view.findViewById(R.id.text_name);
+        textNickname     = view.findViewById(R.id.text_nickname);
+        textBadgeCount   = view.findViewById(R.id.text_badge_count);
+        textMyTitleCount = view.findViewById(R.id.text_my_title_count);
+        textVisitLogCount= view.findViewById(R.id.text_visit_log_count);
+
+        // ✅ ApiService 준비
+        api = new ApiService(requireContext());
+
+        // ✅ 프로필(닉네임/이미지) 바인딩
+        bindProfile();
+
+        // ✅ 카운트 불러오기
+        fetchCounts();
+
+        // ✅ 로그아웃
+        TextView logoutTextView = view.findViewById(R.id.menu_logout);
+        logoutTextView.setOnClickListener(v -> showLogoutDialog());
+    }
+
+    private void bindProfile() {
+        SessionManager sm = SessionManager.getInstance(requireContext());
+
+        String nickname = sm.getNickname();
+        if (TextUtils.isEmpty(nickname)) nickname = "게스트";
+        textName.setText(nickname);
+        // text_nickname은 “칭호” 영역처럼 쓰고 싶으면 서버에서 칭호명을 넣어주면 좋음.
+        // 우선 닉네임 보조 표기로 둡니다.
+        //textNickname.setText("(" + nickname + ")");
+
+        String profileUrl = sm.getProfileImageUrl();
+        if (!TextUtils.isEmpty(profileUrl)) {
+            Glide.with(this)
+                 .load(profileUrl)
+                 .placeholder(R.drawable.image_gone)
+                 .circleCrop()
+                 .into(imageProfile);
+        } else {
+            imageProfile.setImageResource(R.drawable.image_gone);
+        }
+    }
+
+    private void setTitle(String title) {
+        textNickname.setText("("+ title + ")");
+    }
+    private void fetchCounts() {
+        // 기본값 미리 0개로
+        setCounts(0, 0, 0);
+        setTitle("없음");
+        api.fetchMyPageSummary(new ApiService.Callback<ApiService.MyPageSummary>() {
+            @Override public void onSuccess(ApiService.MyPageSummary s) {
+                setCounts(s.badgeCount, s.titleCount, s.visitCount);
+                setTitle(s.currentTitle);
+            }
+            @Override public void onError(Exception e) {
+                // 실패 시 0개 유지
+                setCounts(0, 0, 0);
+                setTitle("없음");
+                // 필요하면 Toast로 알려도 됨
+                // Toast.makeText(requireContext(), "요약 불러오기 실패", Toast.LENGTH_SHORT).show();
+            }
         });
+    }
+
+    private void setCounts(int badge, int title, int visit) {
+        textBadgeCount.setText(badge + "개");
+        textMyTitleCount.setText(title + "개");
+        textVisitLogCount.setText(visit + "개");
     }
 
     private void showLogoutDialog() {
         new AlertDialog.Builder(getContext())
-                .setTitle("로그아웃") // 팝업 제목
+                .setTitle("로그아웃")
                 .setMessage("로그아웃 하시겠습니까?")
-                .setPositiveButton("예", (dialog, which) -> {
-                    performLogout();
-                })
+                .setPositiveButton("예", (dialog, which) -> performLogout())
                 .setNegativeButton("아니오", null)
                 .show();
     }
 
     private void performLogout(){
-        // 1. SharedPreferences의 로그인 상태를 false로 변경
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("login_prefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("is_logged_in", false);
-        // 필요하다면 사용자 토큰, ID 등 다른 정보도 합께 삭제
-        editor.apply();
+        // a) 로그인 플래그
+        SharedPreferences sp = requireActivity().getSharedPreferences("login_prefs", Context.MODE_PRIVATE);
+        sp.edit().putBoolean("is_logged_in", false).apply();
 
-        // 2. 앱 재시작 -> 로그인 상태 다시 확인
+        // b) 세션(서버 토큰/유저정보)도 정리
+        SessionManager.getInstance(requireContext()).clear();
+
+        // c) 스플래시로 이동
         Intent intent = new Intent(getActivity(), SplashActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        // 3. 현재 Activity(MainActivity) 종료
-        getActivity().finish();
+        requireActivity().finish();
     }
 }
