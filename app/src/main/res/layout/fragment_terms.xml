@@ -177,7 +177,7 @@
             app:layout_constraintStart_toEndOf="@id/checkbox_agree_lbs"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_view_terms" />
+            app:layout_constraintEnd_toStartOf="@id/btn_view_lbs" />
 
         <!-- 상세 보기 버튼 ('>' 모양 이미지) -->
         <ImageButton

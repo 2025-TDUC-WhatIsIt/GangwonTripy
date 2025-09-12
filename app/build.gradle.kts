@@ -15,11 +15,11 @@ fun secret(name: String): String =
         ?: throw GradleException("Missing secret: $name (put it in local.properties or env/gradle.properties)")
 
 android {
-    namespace = "com.example.gangwontripy"
+    namespace = "com.whatisit.gangwontripy"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.gangwontripy"
+        applicationId = "com.whatisit.gangwontripy"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -43,11 +43,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     compileOptions {
