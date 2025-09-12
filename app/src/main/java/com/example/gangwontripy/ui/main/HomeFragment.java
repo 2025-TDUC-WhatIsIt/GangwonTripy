@@ -165,19 +165,6 @@ public class HomeFragment extends Fragment {
             return false;
         });
 
-        // --- 전통시장 섹션 ---
-        RecyclerView marketRecyclerView = view.findViewById(R.id.recycler_view_market);
-        List<MarketItem> marketDataList = new ArrayList<>();
-        marketDataList.add(new MarketItem("강릉중앙시장", R.drawable.img_rectangle));
-        marketDataList.add(new MarketItem("속초관광수산시장", R.drawable.img_rectangle));
-        marketDataList.add(new MarketItem("정선아리랑시장", R.drawable.img_rectangle));
-        marketDataList.add(new MarketItem("동해동쪽바다중앙시장", R.drawable.img_rectangle));
-        marketDataList.add(new MarketItem("원주중앙시장", R.drawable.img_rectangle));
-        marketDataList.add(new MarketItem("춘천중앙시장", R.drawable.img_rectangle));
-        MarketAdapter marketAdapter = new MarketAdapter(marketDataList);
-        marketRecyclerView.setAdapter(marketAdapter);
-        marketRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        new PagerSnapHelper().attachToRecyclerView(marketRecyclerView);
 
         // --- 관광명소 ViewPager2 & 도트 세팅 ---
         touristPager = view.findViewById(R.id.viewpager_tourist);
