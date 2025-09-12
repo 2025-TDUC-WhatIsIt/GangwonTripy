@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 //        키 해시 확인용 코드
 //        String keyHash = Utility.INSTANCE.getKeyHash(this);
 //        Log.d("KeyHash", keyHash);
+        KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY);
         setContentView(R.layout.activity_main);
         // 하단바가 있는 폰과 없는 폰에서 네비게이션 바 처리 부분
         // 엣지-투-엣지로 그리고 인셋은 우리가 처리

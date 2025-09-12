@@ -82,7 +82,7 @@ public class DirectionsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // SDK 초기화
-        KakaoMapSdk.init(requireContext(), KAKAO_MAP_KEY);
+        //KakaoMapSdk.init(requireContext(), KAKAO_MAP_KEY);
 
         // XML에 있는 MapView 가져오기
         mapView = view.findViewById(R.id.map_view);
