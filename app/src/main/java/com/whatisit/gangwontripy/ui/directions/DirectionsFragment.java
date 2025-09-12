@@ -1,6 +1,8 @@
 package com.whatisit.gangwontripy.ui.directions;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.whatisit.gangwontripy.BuildConfig;
 
 import android.content.Intent;
@@ -11,6 +13,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -65,6 +70,13 @@ public class DirectionsFragment extends Fragment {
     private static final int RADIUS = 10_000; // m
     private static final LatLng DEFAULT_CENTER = LatLng.from(37.48895833, 127.9872222); // 횡성
 
+    private static final LatLng POS_HS = LatLng.from(37.48895833, 127.9872222); // 횡성
+    private static final LatLng POS_HC = LatLng.from(37.69442222, 127.8908417); // 홍천
+    private static final LatLng POS_IJ = LatLng.from(38.06697222, 128.1726972); // 인제
+    private static final LatLng POS_ALL = LatLng.from(
+            (POS_HS.latitude + POS_HC.latitude + POS_IJ.latitude) / 3.0,
+            (POS_HS.longitude + POS_HC.longitude + POS_IJ.longitude) / 3.0
+    );
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -99,6 +111,7 @@ public class DirectionsFragment extends Fragment {
             @Override public int getZoomLevel() { return 14; }
             @Override public MapViewInfo getMapViewInfo() { return MapViewInfo.from("openmap", MapType.NORMAL); }
         });
+        initTopControls(view);
         MenuHost menuHost = requireActivity();
         menuHost.addMenuProvider(new MenuProvider() {
             @Override
@@ -115,6 +128,82 @@ public class DirectionsFragment extends Fragment {
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
+    }
+
+    private void initTopControls(@NonNull View root) {
+        MaterialAutoCompleteTextView act = root.findViewById(R.id.act_location);
+
+        final List<String> AREAS = Arrays.asList("전체","인제","홍천","횡성");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                requireContext(), android.R.layout.simple_list_item_1, AREAS
+        ) {
+            @NonNull @Override public Filter getFilter() {
+                return new Filter() {
+                    @Override protected FilterResults performFiltering(CharSequence constraint) {
+                        // 항상 전체 목록 반환
+                        FilterResults res = new FilterResults();
+                        res.values = AREAS;
+                        res.count = AREAS.size();
+                        return res;
+                    }
+                    @Override protected void publishResults(CharSequence constraint, FilterResults results) {
+                        notifyDataSetChanged();
+                    }
+                    @Override public CharSequence convertResultToString(Object v) { return (CharSequence) v; }
+                };
+            }
+        };
+
+        act.setAdapter(adapter);
+        act.setText("전체", false);
+        act.setOnClickListener(v -> act.showDropDown());
+        act.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) act.showDropDown(); });
+
+        act.setOnItemClickListener((parent, v, pos, id) -> {
+            switch (pos) {
+                case 0: moveAndSearch(POS_ALL, 11, 25_000); break;
+                case 1: moveAndSearch(POS_IJ, 14, RADIUS);   break;
+                case 2: moveAndSearch(POS_HC, 14, RADIUS);   break;
+                case 3: moveAndSearch(POS_HS, 14, RADIUS);   break;
+            }
+        });
+
+        // 2) 필터칩(타원형 버튼) → contentTypeId 다중 토글
+        ChipGroup chips = root.findViewById(R.id.chips_types);
+        Map<Integer, Integer> chipToType = Map.of(
+                R.id.chip_12, 12,
+                R.id.chip_14, 14,
+                R.id.chip_15, 15,
+                R.id.chip_39, 39
+        );
+
+        chips.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            activeTypes.clear();
+            for (int id : checkedIds) {
+                Integer type = chipToType.get(id);
+                if (type != null) activeTypes.add(type);
+            }
+            // 아무것도 선택 안 하면 전부 선택으로 복구(UX 보호)
+            applyFilter();
+        });
+    }
+
+    // 카메라 이동 + 해당 중심으로 재조회
+    private void moveAndSearch(LatLng target, int zoom, int radius) {
+        if (kakaoMap != null) {
+            try {
+                // 최신 벡터맵 카메라 이동 (SDK에 따라 import 다를 수 있음)
+                // import com.kakao.vectormap.camera.CameraUpdateFactory;
+                kakaoMap.moveCamera(com.kakao.vectormap.camera.CameraUpdateFactory
+                        .newCenterPosition(target, zoom));
+            } catch (Throwable ignore) {
+                // 일부 버전에서 위 팩토리 시그니처가 다르면 center/zoom을 따로 설정하는 API를 사용하세요.
+            }
+        }
+        // 서버 재조회 (typesCsv=null → 서버에서 4종 전부 내려줌)
+        fetchPoisFromServer(target.latitude, target.longitude, radius, null);
     }
 
     // ===================== Options menu (필터) =====================
