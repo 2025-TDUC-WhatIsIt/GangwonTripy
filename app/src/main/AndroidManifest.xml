@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.gangwontripy">
+    package="com.whatisit.gangwontripy">
 
     <!-- ✅ 권한은 manifest 최상단에 -->
     <uses-feature
@@ -28,7 +28,7 @@
             android:value="${kakao_api_key}" />
 
         <activity
-            android:name=".ui.splash.SplashActivity"
+            android:name="com.whatisit.gangwontripy.ui.splash.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,14 +37,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity"
+        <activity android:name="com.whatisit.gangwontripy.MainActivity"
             android:exported="true"/>
 
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name="com.whatisit.gangwontripy.ui.auth.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.mypage.QrScanActivity"
+            android:name="com.whatisit.gangwontripy.ui.mypage.QrScanActivity"
             android:exported="false"/>
     </application>
 

@@ -7,25 +7,25 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.gangwontripy.ui.main.HomeFragment"
+        android:name="com.whatisit.gangwontripy.ui.main.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home"/>
 
     <fragment
         android:id="@+id/directionsFragment"
-        android:name="com.example.gangwontripy.ui.directions.DirectionsFragment"
+        android:name="com.whatisit.gangwontripy.ui.directions.DirectionsFragment"
         android:label="fragment_directions"
         tools:layout="@layout/fragment_directions"/>
 
     <fragment
         android:id="@+id/bookmarkFragment"
-        android:name="com.example.gangwontripy.ui.bookmark.BookmarkFragment"
+        android:name="com.whatisit.gangwontripy.ui.bookmark.BookmarkFragment"
         android:label="fragment_bookmark"
         tools:layout="@layout/fragment_recycler_only" />
 
     <fragment
         android:id="@+id/myPageFragment"
-        android:name="com.example.gangwontripy.ui.mypage.MyPageFragment"
+        android:name="com.whatisit.gangwontripy.ui.mypage.MyPageFragment"
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page_old">
         <action
@@ -42,19 +42,19 @@
 
     <fragment
         android:id="@+id/noticeFragment"
-        android:name="com.example.gangwontripy.ui.notice.NoticeFragment"
+        android:name="com.whatisit.gangwontripy.ui.notice.NoticeFragment"
         android:label="공지사항"
         tools:layout="@layout/fragment_notice"/>
 
     <fragment
         android:id="@+id/faqFragment"
-        android:name="com.example.gangwontripy.ui.faq.FaqFragment"
+        android:name="com.whatisit.gangwontripy.ui.faq.FaqFragment"
         android:label="자주 묻는 질문"
         tools:layout="@layout/fragment_faq" />
 
     <fragment
         android:id="@+id/documentFragment"
-        android:name="com.example.gangwontripy.ui.document.DocumentFragment"
+        android:name="com.whatisit.gangwontripy.ui.document.DocumentFragment"
         android:label="문서 보기"
         tools:layout="@layout/fragment_document">
         <argument

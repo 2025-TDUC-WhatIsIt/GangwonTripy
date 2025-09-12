@@ -15,11 +15,11 @@ fun secret(name: String): String =
         ?: throw GradleException("Missing secret: $name (put it in local.properties or env/gradle.properties)")
 
 android {
-    namespace = "com.example.gangwontripy"
+    namespace = "com.whatisit.gangwontripy"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.gangwontripy"
+        applicationId = "com.whatisit.gangwontripy"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -43,11 +43,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     compileOptions {
@@ -68,7 +71,7 @@ dependencies {
 
     implementation("com.kakao.maps.open:android:2.12.8")
     implementation("com.kakao.sdk:v2-common:2.20.1")
-
+    implementation("com.google.android.material:material:1.12.0")
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
