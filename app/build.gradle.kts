@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.whatisit.gangwontripy"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -71,7 +71,7 @@ dependencies {
 
     implementation("com.kakao.maps.open:android:2.12.8")
     implementation("com.kakao.sdk:v2-common:2.20.1")
-
+    implementation("com.google.android.material:material:1.12.0")
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
