@@ -17,5 +17,6 @@
 
     <string name="terms_content">약관 및 정책 본문 내용은 어쩌구 저쩌구 쏼라쏼라이다</string>
     <string name="privacy_content">개인정보 처리방침 본문 내용은 이러쿵 저러쿵이다</string>
+    <string name="lbs_content">위치기반 서비스 이용약관 본문 내용은 이러쿵 저러쿵이다</string>
 
 </resources>

@@ -49,6 +49,9 @@ public class DocumentFragment extends Fragment {
             } else if ("PRIVACY".equals(documentType)) {
                 titleTextView.setText("개인정보 처리방침");
                 contentTextView.setText(R.string.privacy_content);
+            } else if ("LBS".equals(documentType)) {
+                titleTextView.setText("위치기반 서비스 이용약관");
+                contentTextView.setText(R.string.lbs_content);
             }
         }
     }
@@ -67,6 +70,8 @@ public class DocumentFragment extends Fragment {
                     actionBar.setTitle("약관 및 정책");
                 } else if ("PRIVACY".equals(documentType)) {
                     actionBar.setTitle("개인정보 처리방침");
+                } else if ("LBS".equals(documentType)) {
+                    actionBar.setTitle("위치기반 서비스 이용약관");
                 }
             }
         }

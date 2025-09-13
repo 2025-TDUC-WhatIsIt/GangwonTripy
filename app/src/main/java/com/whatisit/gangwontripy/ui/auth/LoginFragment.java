@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.whatisit.gangwontripy.R;
 import com.whatisit.gangwontripy.data.api.ApiClient;
@@ -53,9 +54,11 @@ public class LoginFragment extends Fragment {
         });
 
         registerButton.setOnClickListener(v -> {
-            if (getActivity() instanceof LoginActivity){
-                ((LoginActivity) getActivity()).navigateToTerms();
-            }
+//            if (getActivity() instanceof LoginActivity){
+//                ((LoginActivity) getActivity()).navigateToTerms();
+//            }
+            NavHostFragment.findNavController(LoginFragment.this)
+                    .navigate(R.id.action_loginFragment_to_termsFragment);
         });
     }
 
