@@ -119,13 +119,13 @@ public class RegisterFragment extends Fragment {
         return cs == null ? "" : cs.toString().trim();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity != null) {
-            ActionBar actionBar = activity.getSupportActionBar();
-            if (actionBar != null) actionBar.setTitle("회원정보 입력하기");
-        }
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        AppCompatActivity activity = (AppCompatActivity) getActivity();
+//        if (activity != null) {
+//            ActionBar actionBar = activity.getSupportActionBar();
+//            if (actionBar != null) actionBar.setTitle("회원정보 입력하기");
+//        }
+//    }
 }

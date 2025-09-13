@@ -1,6 +1,8 @@
 package com.whatisit.gangwontripy.ui.document;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +37,6 @@ public class DocumentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TextView titleTextView = view.findViewById(R.id.tv_document_title);
         TextView contentTextView = view.findViewById(R.id.tv_document_content);
 
         if (getArguments() != null) {
@@ -43,12 +44,19 @@ public class DocumentFragment extends Fragment {
             // titleTextView는 fragment_document.xml에 없으므로 삭제하거나 추가해야 합니다.
 
             if ("TERMS".equals(documentType)) {
-                titleTextView.setText("약관 및 정책");
-                // R.string.terms_content는 res/values/strings.xml에 저장된 긴 약관 내용
-                contentTextView.setText(R.string.terms_content);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.terms_content), Html.FROM_HTML_MODE_LEGACY));
+                } else {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.terms_content)));
+                }
             } else if ("PRIVACY".equals(documentType)) {
-                titleTextView.setText("개인정보 처리방침");
-                contentTextView.setText(R.string.privacy_content);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.privacy_content), Html.FROM_HTML_MODE_LEGACY));
+                } else {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.privacy_content)));
+                }
+            } else if ("LBS".equals(documentType)) {
+                contentTextView.setText(R.string.lbs_content);
             }
         }
     }
@@ -67,6 +75,8 @@ public class DocumentFragment extends Fragment {
                     actionBar.setTitle("약관 및 정책");
                 } else if ("PRIVACY".equals(documentType)) {
                     actionBar.setTitle("개인정보 처리방침");
+                } else if ("LBS".equals(documentType)) {
+                    actionBar.setTitle("위치기반 서비스 이용약관");
                 }
             }
         }

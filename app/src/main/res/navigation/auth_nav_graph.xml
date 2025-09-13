@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/auth_nav_graph"
+    app:startDestination="@id/loginFragment"> <!-- 시작 화면은 LoginFragment -->
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.whatisit.gangwontripy.ui.auth.LoginFragment"
+        android:label=""
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_termsFragment"
+            app:destination="@id/termsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/termsFragment"
+        android:name="com.whatisit.gangwontripy.ui.auth.TermsFragment"
+        android:label=""
+        tools:layout="@layout/fragment_terms">
+        <action
+            android:id="@+id/action_termsFragment_to_documentFragment"
+            app:destination="@id/documentFragment" />
+        <action
+            android:id="@+id/action_termsFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.whatisit.gangwontripy.ui.auth.RegisterFragment"
+        android:label=""
+        tools:layout="@layout/fragment_register"/>
+
+    <fragment
+        android:id="@+id/documentFragment"
+        android:name="com.whatisit.gangwontripy.ui.document.DocumentFragment"
+        android:label="문서 보기"
+        tools:layout="@layout/fragment_document">
+        <argument
+            android:name="document_type"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

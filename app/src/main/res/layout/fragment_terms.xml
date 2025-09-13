@@ -38,7 +38,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clickable="false"/>
 
         <TextView
             android:layout_width="0dp"
@@ -49,7 +50,8 @@
             app:layout_constraintStart_toEndOf="@id/checkbox_agree_all"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:clickable="false"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -72,7 +74,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clickable="false" />
 
         <TextView
             android:layout_width="0dp"
@@ -84,7 +87,8 @@
             app:layout_constraintStart_toEndOf="@id/checkbox_agree_terms"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_view_terms" />
+            app:layout_constraintEnd_toStartOf="@id/btn_view_terms"
+            android:clickable="false" />
 
         <!-- 상세 보기 버튼 ('>' 모양 이미지) -->
         <!-- TODO: 버튼 클릭 (위아래)범위가 좁은듯       -->
@@ -119,7 +123,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clickable="false" />
 
         <TextView
             android:layout_width="0dp"
@@ -131,7 +136,8 @@
             app:layout_constraintStart_toEndOf="@id/checkbox_agree_personal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_view_personal" />
+            app:layout_constraintEnd_toStartOf="@id/btn_view_personal"
+            android:clickable="false"/>
 
         <!-- 상세 보기 버튼 ('>' 모양 이미지) -->
         <ImageButton
@@ -165,7 +171,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clickable="false" />
 
         <TextView
             android:layout_width="0dp"
@@ -177,7 +184,8 @@
             app:layout_constraintStart_toEndOf="@id/checkbox_agree_lbs"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_view_lbs" />
+            app:layout_constraintEnd_toStartOf="@id/btn_view_lbs"
+            android:clickable="false" />
 
         <!-- 상세 보기 버튼 ('>' 모양 이미지) -->
         <ImageButton
