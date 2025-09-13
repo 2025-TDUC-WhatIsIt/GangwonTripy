@@ -152,19 +152,19 @@ public class TermsFragment extends Fragment {
                 checkboxAgreeLbs.isChecked();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // 1. 현재 Fragment를 포함하고 있는 Activity를 가져옵니다.
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity != null) {
-            // 2. Activity의 ActionBar를 가져옵니다. (null일 수 있으므로 체크)
-            ActionBar actionBar = activity.getSupportActionBar();
-            if (actionBar != null) {
-                // 3. ActionBar의 제목을 설정합니다.
-                actionBar.setTitle("회원가입 약관 동의");
-            }
-        }
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//
+//        // 1. 현재 Fragment를 포함하고 있는 Activity를 가져옵니다.
+//        AppCompatActivity activity = (AppCompatActivity) getActivity();
+//        if (activity != null) {
+//            // 2. Activity의 ActionBar를 가져옵니다. (null일 수 있으므로 체크)
+//            ActionBar actionBar = activity.getSupportActionBar();
+//            if (actionBar != null) {
+//                // 3. ActionBar의 제목을 설정합니다.
+//                actionBar.setTitle("회원가입 약관 동의");
+//            }
+//        }
+//    }
 }

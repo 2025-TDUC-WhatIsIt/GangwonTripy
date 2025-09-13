@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.whatisit.gangwontripy.ui.auth.LoginFragment"
-        android:label="로그인"
+        android:label=""
         tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_termsFragment"
@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/termsFragment"
         android:name="com.whatisit.gangwontripy.ui.auth.TermsFragment"
-        android:label="회원가입 약관 동의"
+        android:label=""
         tools:layout="@layout/fragment_terms">
         <action
             android:id="@+id/action_termsFragment_to_documentFragment"
@@ -31,7 +31,7 @@
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.whatisit.gangwontripy.ui.auth.RegisterFragment"
-        android:label="회원정보 입력"
+        android:label=""
         tools:layout="@layout/fragment_register"/>
 
     <fragment
