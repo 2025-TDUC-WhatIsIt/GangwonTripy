@@ -38,8 +38,8 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
-        etId = view.findViewById(R.id.login_id);          // ← 레이아웃 ID에 맞게 수정
-        etPw = view.findViewById(R.id.login_pw);    // ← 레이아웃 ID에 맞게 수정
+        etId = view.findViewById(R.id.login_id);
+        etPw = view.findViewById(R.id.login_pw);
 
         Button loginButton = view.findViewById(R.id.login_btn);
         ImageButton kakaoLoginButton = view.findViewById(R.id.login_kakao);
