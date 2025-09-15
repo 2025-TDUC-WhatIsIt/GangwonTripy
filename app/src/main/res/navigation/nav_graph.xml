@@ -29,6 +29,10 @@
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page_old">
         <action
+            android:id="@+id/action_myPageFragment_to_visitLogFragment"
+            app:destination="@id/visitLogFragment" />
+
+        <action
             android:id="@+id/action_myPageFragment_to_noticeFragment"
             app:destination="@id/noticeFragment" />
         <action
@@ -39,6 +43,12 @@
             app:destination="@id/documentFragment" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/visitLogFragment"
+        android:name="com.whatisit.gangwontripy.ui.mypage.visitlog.VisitLogFragment"
+        android:label="나의 방문 일지"
+        tools:layout="@layout/fragment_visit_log"/>
 
     <fragment
         android:id="@+id/noticeFragment"

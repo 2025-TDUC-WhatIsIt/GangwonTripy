@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -45,10 +46,17 @@ public class MyPageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        LinearLayout layoutVisitLog = view.findViewById(R.id.layout_visit_log);
+
         TextView noticeTextView = view.findViewById(R.id.menu_notice);
         TextView faqTextView = view.findViewById(R.id.menu_faq);
         TextView termsTextView = view.findViewById(R.id.menu_terms);
         TextView privacyTextView = view.findViewById(R.id.menu_privacy);
+
+        layoutVisitLog.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_visitLogFragment);
+        });
       
         noticeTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)
