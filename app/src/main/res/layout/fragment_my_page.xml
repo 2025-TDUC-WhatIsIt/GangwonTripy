@@ -77,15 +77,27 @@
                 app:layout_constraintTop_toBottomOf="@id/text_name" />
 
             <!-- 오른쪽: 배지, 칭호, 방문 일지 -->
+            <LinearLayout
+                android:id="@+id/layout_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="50dp"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toEndOf="@id/image_profile"
+                app:layout_constraintTop_toTopOf="@id/image_profile">
+
             <TextView
                 android:id="@+id/text_badge_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
                 android:text="내가 모은 배지"
                 android:textSize="14sp"
-                app:layout_constraintStart_toEndOf="@id/image_profile"
-                app:layout_constraintTop_toTopOf="@id/image_profile" />
+                android:clickable="false"
+                android:focusable="false"/>
 
             <TextView
                 android:id="@+id/text_badge_count"
@@ -95,18 +107,29 @@
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@id/text_badge_title"
-                app:layout_constraintTop_toBottomOf="@id/text_badge_title" />
+                android:clickable="false"
+                android:focusable="false"/>
+            </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layout_chingho"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="@id/layout_badge"
+                app:layout_constraintTop_toBottomOf="@id/layout_badge">
             <TextView
                 android:id="@+id/text_my_title_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="내가 받은 칭호"
                 android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="@id/text_badge_title"
-                app:layout_constraintTop_toBottomOf="@id/text_badge_count" />
+                android:clickable="false"
+                android:focusable="false"/>
 
             <TextView
                 android:id="@+id/text_my_title_count"
@@ -116,21 +139,21 @@
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@id/text_my_title_title"
-                app:layout_constraintTop_toBottomOf="@id/text_my_title_title" />
+                android:clickable="false"
+                android:focusable="false"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/layout_visit_log"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
                 android:padding="8dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                app:layout_constraintStart_toStartOf="@id/text_my_title_count"
-                app:layout_constraintTop_toBottomOf="@id/text_my_title_count">
+                app:layout_constraintStart_toStartOf="@id/layout_chingho"
+                app:layout_constraintTop_toBottomOf="@id/layout_chingho">
 
                 <TextView
                     android:id="@+id/text_visit_log_title"

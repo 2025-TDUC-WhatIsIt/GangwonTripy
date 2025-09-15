@@ -46,12 +46,18 @@ public class MyPageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        LinearLayout layoutBadge = view.findViewById(R.id.layout_badge);
         LinearLayout layoutVisitLog = view.findViewById(R.id.layout_visit_log);
 
         TextView noticeTextView = view.findViewById(R.id.menu_notice);
         TextView faqTextView = view.findViewById(R.id.menu_faq);
         TextView termsTextView = view.findViewById(R.id.menu_terms);
         TextView privacyTextView = view.findViewById(R.id.menu_privacy);
+
+        layoutBadge.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_badgeFragment);
+        });
 
         layoutVisitLog.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)

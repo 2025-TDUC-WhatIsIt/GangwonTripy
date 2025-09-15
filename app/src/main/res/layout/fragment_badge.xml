@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".ui.mypage.badge.BadgeFragment">
+
+    <!--
+        툴바는 MainActivity가 관리하므로, 이 Fragment의 레이아웃에는
+        RecyclerView만 있으면 됩니다.
+        Fragment의 onResume에서 MainActivity의 툴바를 보이게 하고,
+        제목을 "내가 모은 배지"로 설정하면 됩니다.
+    -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_badges"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:clipToPadding="false"
+
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+
+        tools:listitem="@layout/item_badge"
+        tools:itemCount="15"/>
+
+</LinearLayout>
