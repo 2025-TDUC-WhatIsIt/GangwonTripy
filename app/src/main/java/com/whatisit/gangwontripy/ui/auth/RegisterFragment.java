@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.whatisit.gangwontripy.R;
 import com.whatisit.gangwontripy.data.api.AuthApi;
 import com.whatisit.gangwontripy.data.api.ApiClient; // ← 기존 프로젝트에 있는 Retrofit 빌더 사용
+import com.whatisit.gangwontripy.data.model.LoginRes;
 import com.whatisit.gangwontripy.data.model.SignupReq;
 
 import retrofit2.Call;
@@ -63,25 +64,23 @@ public class RegisterFragment extends Fragment {
             // 2) 요청
             setLoading(true);
             SignupReq req = new SignupReq(username, password, nickname);
-            authApi.signup(req).enqueue(new Callback<Boolean>() {
-                @Override public void onResponse(@NonNull Call<Boolean> call, @NonNull Response<Boolean> res) {
-                    setLoading(false);
-                    if (!res.isSuccessful()) {
-                        toast("회원가입 실패(" + res.code() + ")");
-                        return;
-                    }
-                    Boolean ok = res.body();
-                    if (ok != null && ok) {
-                        toast("회원가입 완료!");
-                        // 필요시: 바로 로그인 API 호출 후 토큰 저장 → MainActivity 이동
-                        goLoginAndFinish();
+            android.util.Log.d("SIGNUPREQ", "SignupReq" + req);
+            authApi.signup(req).enqueue(new Callback<LoginRes>() {
+                @Override
+                public void onResponse(Call<LoginRes> call, Response<LoginRes> res) {
+                    if (res.isSuccessful() && res.body() != null) {
+                        LoginRes body = res.body();
+                        if (getActivity() instanceof LoginActivity) {
+                            ((LoginActivity) getActivity()).onLoginSuccess(body);
+                        }
                     } else {
-                        toast("회원가입이 완료되지 않았습니다.");
+                        Toast.makeText(requireContext(), "회원가입 실패", Toast.LENGTH_SHORT).show();
                     }
                 }
-                @Override public void onFailure(@NonNull Call<Boolean> call, @NonNull Throwable t) {
-                    setLoading(false);
-                    toast("네트워크 오류: " + t.getMessage());
+
+                @Override
+                public void onFailure(Call<LoginRes> call, Throwable t) {
+                    Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });

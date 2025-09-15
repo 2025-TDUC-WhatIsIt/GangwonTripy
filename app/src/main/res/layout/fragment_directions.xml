@@ -35,21 +35,25 @@
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:endIconMode="dropdown_menu">
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_expand_more_24">
 
-                <!-- ⬅️ 반드시 MaterialAutoCompleteTextView 사용 -->
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/act_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="전체"
-                    android:inputType="none"
-                    android:importantForAutofill="no"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/act_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="지역"
+                android:focusable="false"
+                android:clickable="true"
+                android:cursorVisible="false"
+                android:inputType="none"
+                android:importantForAutofill="no"
+                android:maxLines="1"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
 
-            <!-- contentType 필터칩 (타원형 버튼) -->
+
+        <!-- contentType 필터칩 (타원형 버튼) -->
             <!-- contentType 필터칩 (타원형 버튼) -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
