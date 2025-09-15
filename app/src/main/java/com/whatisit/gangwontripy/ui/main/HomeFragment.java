@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,11 @@ public class HomeFragment extends Fragment {
     private ProgressBar loadingIndicator;
     private EditText searchBar;
 
+    private com.google.android.material.appbar.MaterialToolbar categoryToolbar;
+    private boolean inCategoryMode = false;
+    private int originalListTopPadding = -1;
+
+
     // 검색
     private SearchedSpotAdapter searchedSpotAdapter;
 
@@ -64,6 +70,32 @@ public class HomeFragment extends Fragment {
 
     private final Handler autoHandler = new Handler(Looper.getMainLooper());
     private final long AUTO_DELAY_MS = 3000L;
+
+    // 자연 카테고리 cat3 코드 매핑
+    private static final String CAT3_MOUNTAIN   = "A01010400"; // 산
+    private static final String CAT3_RIVER      = "A01011800"; // 강(=하천)
+    private static final String CAT3_LAKE       = "A01011700"; // 호수
+    private static final String CAT3_WATERFALL  = "A01010800"; // 폭포
+    private static final String CAT3_CAVE       = "A01011900"; // 동굴
+
+    // 기타에서 제외 항목
+    private static final java.util.Set<String> COASTAL_EXCLUDES =
+            new java.util.HashSet<>(java.util.Arrays.asList(
+                    "A01011100", // 해안절경
+                    "A01011200", // 해수욕장
+                    "A01011300", // 섬
+                    "A01011400", // 항구/포구
+                    "A01011600"  // 등대
+            ));
+
+    // 메인 5종 세트
+    private static final java.util.Set<String> MAIN_FIVE =
+            new java.util.HashSet<>(java.util.Arrays.asList(
+                    CAT3_MOUNTAIN, CAT3_RIVER, CAT3_LAKE, CAT3_WATERFALL, CAT3_CAVE
+            ));
+
+    private java.util.List<TouristSpotItem> naturalAll = new java.util.ArrayList<>();
+
     // 북마크
     private final java.util.Set<String> savedIds = new java.util.HashSet<>();
     private final Runnable autoRunnable = new Runnable() {
@@ -126,6 +158,23 @@ public class HomeFragment extends Fragment {
 
         setupRecyclerView();
 
+        categoryToolbar = view.findViewById(R.id.category_toolbar);
+
+        // 시스템 뒤로가기로도 카테고리 모드 빠져나오기
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new androidx.activity.OnBackPressedCallback(true) {
+                    @Override public void handleOnBackPressed() {
+                        if (inCategoryMode) {
+                            exitCategoryMode();
+                        } else {
+                            setEnabled(false);
+                            requireActivity().onBackPressed();
+                        }
+                    }
+                }
+        );
+
         // 검색창 동작
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -138,6 +187,20 @@ public class HomeFragment extends Fragment {
             return false;
         });
 
+        // ① 카테고리 버튼 클릭 리스너 등록
+        View bMountain   = view.findViewById(R.id.btn_cat_mountain);
+        View bRiver      = view.findViewById(R.id.btn_cat_river);
+        View bLake       = view.findViewById(R.id.btn_cat_lake);
+        View bWaterfall  = view.findViewById(R.id.btn_cat_waterfall);
+        View bCave       = view.findViewById(R.id.btn_cat_cave);
+        View bEtc        = view.findViewById(R.id.btn_cat_etc);
+
+        if (bMountain != null)  bMountain.setOnClickListener(v -> showCategory(CAT3_MOUNTAIN, "산"));
+        if (bRiver != null)     bRiver.setOnClickListener(v -> showCategory(CAT3_RIVER, "하천(강)"));
+        if (bLake != null)      bLake.setOnClickListener(v -> showCategory(CAT3_LAKE, "호수"));
+        if (bWaterfall != null) bWaterfall.setOnClickListener(v -> showCategory(CAT3_WATERFALL, "폭포"));
+        if (bCave != null)      bCave.setOnClickListener(v -> showCategory(CAT3_CAVE, "동굴"));
+        if (bEtc != null)       bEtc.setOnClickListener(v -> showEtcCategory());
 
         // --- 관광명소 ViewPager2 & 도트 세팅 ---
         touristPager = view.findViewById(R.id.viewpager_tourist);
@@ -203,6 +266,158 @@ public class HomeFragment extends Fragment {
             });
         }
     }
+    private void onAllRegionLoaded(List<TouristSpotItem> all) {
+        if (all.isEmpty()) return;
+
+        // 최신순 + 이미지 있는 것 먼저
+        java.util.Collections.sort(all, (o1, o2) -> {
+            String t1 = o1.getModifiedTime() == null ? "" : o1.getModifiedTime();
+            String t2 = o2.getModifiedTime() == null ? "" : o2.getModifiedTime();
+            return t2.compareTo(t1);
+        });
+        List<TouristSpotItem> withImg = new ArrayList<>();
+        List<TouristSpotItem> noImg  = new ArrayList<>();
+        for (TouristSpotItem it : all) {
+            String img = android.text.TextUtils.isEmpty(it.getFirstImage()) ? it.getFirstImage2() : it.getFirstImage();
+            if (android.text.TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
+        }
+        withImg.addAll(noImg);
+
+        // ✅ 원본 보관 (버튼 필터에서 사용)
+        naturalAll = withImg;
+
+        // 기존 뷰페이저 노출/자동슬라이드 유지
+        touristAdapter.submitList(withImg);
+        setupTouristDots(touristAdapter.getRealCount());
+        updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());
+        startAutoSlideIfReady();
+    }
+
+    /** 특정 cat3 하나로 필터하여 리스트 모드로 표시 */
+    private void showCategory(@NonNull String cat3, @NonNull String label) {
+        if (naturalAll == null || naturalAll.isEmpty()) {
+            android.widget.Toast.makeText(requireContext(), "데이터 로딩 중입니다.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+        List<TouristSpotItem> filtered = new ArrayList<>();
+        for (TouristSpotItem it : naturalAll) {
+            String c3 = safeCat3(it);
+            if (cat3.equals(c3)) filtered.add(it);
+        }
+        enterCategoryMode(label);
+        showList(label, filtered);
+    }
+
+    /** 기타: 메인5 + 해안5 제외한 나머지(자연)만 표시 */
+    private void showEtcCategory() {
+        if (naturalAll == null || naturalAll.isEmpty()) {
+            android.widget.Toast.makeText(requireContext(), "데이터 로딩 중입니다.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+        List<TouristSpotItem> filtered = new ArrayList<>();
+        for (TouristSpotItem it : naturalAll) {
+            String c3 = safeCat3(it);
+            // cat3가 비어있지 않으면서 메인5/해안5에 속하지 않는 것만 채택
+            if (c3 != null && !MAIN_FIVE.contains(c3) && !COASTAL_EXCLUDES.contains(c3)) {
+                filtered.add(it);
+            }
+        }
+        enterCategoryMode("기타");
+        showList("기타", filtered);
+    }
+
+    /** 리스트 화면으로 전환하여 item_spot으로 보여주기 */
+    private void showList(String title, List<TouristSpotItem> items) {
+        searchedSpotAdapter.submitList(items);
+        showSearchResultState(); // 기본/로딩/검색결과 UI 전환 (기존 메서드 그대로 사용)
+        android.widget.Toast.makeText(requireContext(),
+                title + " 카테고리: " + items.size() + "건", android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    /** cat3 getter 안전 추출 */
+    private @Nullable String safeCat3(TouristSpotItem it) {
+        try {
+            String v = it.getCat3();
+            if (v != null && !v.trim().isEmpty()) return v.trim();
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private void enterCategoryMode(@NonNull String title){
+        inCategoryMode = true;
+
+        // 상단 툴바 ON
+        categoryToolbar.setVisibility(View.VISIBLE);
+        categoryToolbar.setTitle(title);
+        categoryToolbar.setNavigationOnClickListener(v -> exitCategoryMode());
+
+        // 검색창 숨기기
+        if (searchBar != null) searchBar.setVisibility(View.GONE);
+
+        // 리스트가 툴바 뒤에 가리지 않도록 top padding 보정
+        if (originalListTopPadding == -1) originalListTopPadding = searchResultRecyclerView.getPaddingTop();
+        categoryToolbar.post(() -> {
+            int toolbarH = categoryToolbar.getHeight();
+            if (toolbarH == 0) toolbarH = getActionBarSize(); // ← 여기 사용
+            searchResultRecyclerView.setPadding(
+                    searchResultRecyclerView.getPaddingLeft(),
+                    originalListTopPadding + toolbarH,
+                    searchResultRecyclerView.getPaddingRight(),
+                    searchResultRecyclerView.getPaddingBottom()
+            );
+        });
+
+        // 리스트 화면으로 전환
+        showSearchResultState();
+    }
+    private int getActionBarSize() {
+        TypedValue tv = new TypedValue();
+        // 1) framework
+        if (requireContext().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        // 2) appcompat fallback
+        if (requireContext().getTheme().resolveAttribute(
+                androidx.appcompat.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        // 3) material fallback
+        if (requireContext().getTheme().resolveAttribute(
+                com.google.android.material.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        // 최종: 기본값(보통 56dp)
+        return dp(56);
+    }
+
+
+    private void exitCategoryMode(){
+        inCategoryMode = false;
+
+        // 상단 툴바 OFF
+        categoryToolbar.setVisibility(View.GONE);
+        categoryToolbar.setNavigationOnClickListener(null);
+
+        // 검색창 다시 보이기
+        if (searchBar != null) searchBar.setVisibility(View.VISIBLE);
+
+        // 패딩 원복
+        if (originalListTopPadding >= 0) {
+            searchResultRecyclerView.setPadding(
+                    searchResultRecyclerView.getPaddingLeft(),
+                    originalListTopPadding,
+                    searchResultRecyclerView.getPaddingRight(),
+                    searchResultRecyclerView.getPaddingBottom()
+            );
+        }
+
+        // 리스트 비우고 기본 화면 복귀
+        searchedSpotAdapter.submitList(java.util.Collections.emptyList());
+        searchResultRecyclerView.scrollToPosition(0);
+        showDefaultState();
+    }
+
 
     private void setupRecyclerView() {
         searchedSpotAdapter = new SearchedSpotAdapter();
@@ -400,28 +615,6 @@ public class HomeFragment extends Fragment {
         apiService.fetchTourSpotsAsync(ApiService.HOENGSEONG_NATURAL_URL, cb);
         apiService.fetchTourSpotsAsync(ApiService.INJE_NATURAL_URL, cb);
         apiService.fetchTourSpotsAsync(ApiService.HONGCHEON_NATURAL_URL, cb);
-    }
-
-    private void onAllRegionLoaded(List<TouristSpotItem> all) {
-        if (all.isEmpty()) return;
-        Collections.sort(all, new Comparator<TouristSpotItem>() {
-            @Override public int compare(TouristSpotItem o1, TouristSpotItem o2) {
-                String t1 = o1.getModifiedTime() == null ? "" : o1.getModifiedTime();
-                String t2 = o2.getModifiedTime() == null ? "" : o2.getModifiedTime();
-                return t2.compareTo(t1);
-            }
-        });
-        List<TouristSpotItem> withImg = new ArrayList<>();
-        List<TouristSpotItem> noImg  = new ArrayList<>();
-        for (TouristSpotItem it : all) {
-            String img = TextUtils.isEmpty(it.getFirstImage()) ? it.getFirstImage2() : it.getFirstImage();
-            if (TextUtils.isEmpty(img)) noImg.add(it); else withImg.add(it);
-        }
-        withImg.addAll(noImg);
-        touristAdapter.submitList(withImg);
-        setupTouristDots(touristAdapter.getRealCount());
-        updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());
-        startAutoSlideIfReady();
     }
 
     // 관광명소 도트

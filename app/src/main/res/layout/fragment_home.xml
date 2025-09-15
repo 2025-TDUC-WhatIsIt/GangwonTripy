@@ -7,6 +7,8 @@
     android:background="@android:color/white"
     tools:context=".ui.main.HomeFragment">
 
+
+
     <!-- 1. 앱 바 영역 (스크롤되지 않는 상단 부분) -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
@@ -80,5 +82,16 @@
             android:contentDescription="@string/app_name"/>
     </FrameLayout>
 
-
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/category_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:visibility="gone"
+        android:background="?attr/colorSurface"
+        app:title="카테고리"
+        app:titleCentered="true"
+        app:titleTextColor="?attr/colorOnSurface"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:navigationIconTint="?attr/colorOnSurface"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
