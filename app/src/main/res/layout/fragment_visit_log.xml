@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".ui.mypage.visitlog.VisitLogFragment">
+
+    <!--
+        툴바는 MainActivity가 관리하므로, 이 Fragment의 레이아웃에는
+        RecyclerView만 있으면 됩니다.
+
+        만약 이 화면에만 별도의 툴바가 필요하다면
+        아래 주석 처리된 Toolbar 코드를 활성화하고,
+        MainActivity의 툴바를 숨기는 로직을 추가해야 합니다.
+    -->
+
+    <!--
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_visit_log"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:title="나의 방문 일지" />
+    -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_visit_log"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_timeline_visit" />
+
+</LinearLayout>
