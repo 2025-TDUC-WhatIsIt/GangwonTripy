@@ -13,5 +13,5 @@ public interface AuthApi {
     Call<LoginRes> login(@Body LoginReq req);
 
     @POST("/api/auth/signup")
-    Call<Boolean> signup(@Body SignupReq req);
+    Call<LoginRes> signup(@Body SignupReq req);
 }

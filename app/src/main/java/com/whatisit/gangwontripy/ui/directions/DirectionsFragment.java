@@ -1,6 +1,7 @@
 // com/whatisit/gangwontripy/ui/directions/DirectionsFragment.java
 package com.whatisit.gangwontripy.ui.directions;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -29,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kakao.vectormap.KakaoMap;
@@ -61,7 +63,18 @@ public class DirectionsFragment extends Fragment {
     private MapView mapView;
     private KakaoMap kakaoMap;
     private LabelLayer labelLayer;
-    private LabelStyles pinStyles;
+
+    // 3가지 PinStyle
+    private LabelStyles pinStylesNormal;
+    private LabelStyles pinStylesSmall;
+    private LabelStyles pinStylesSelected;
+    @Nullable private String selectedPoiId = null;
+
+    // POI 카드 오버레이
+    private FrameLayout overlayLayer;
+    private View poiSheet;
+    private ImageView ivPhoto;
+    private TextView tvTitle, tvAddr, tvTel;
 
     // ===== Networking =====
     private final OkHttpClient http = new OkHttpClient();
@@ -95,6 +108,7 @@ public class DirectionsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_directions, container, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
@@ -104,15 +118,41 @@ public class DirectionsFragment extends Fragment {
         FrameLayout bs = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bs);
         bottomSheetBehavior.setHideable(false);
+        try { bottomSheetBehavior.setDraggable(true); } catch (Throwable ignore) {}
+        setPeekHeightDp(32);
+
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override public void onStateChanged(@NonNull View sheet, int newState) { /* no-op */ }
+            @Override public void onSlide(@NonNull View sheet, float slideOffset) {
+                // slideOffset: EXPANDED=1f, COLLAPSED≈0f, HIDDEN=-1f
+                if (slideOffset < -0.25f) { // 충분히 내리면
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
+        });
 
         RecyclerView rv = view.findViewById(R.id.rv_pois);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
         poiAdapter = new PoiAdapter(p -> {
-            moveAndSearch(LatLng.from(p.lat, p.lng), 16, RADIUS);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            selectedPoiId = p.id;
+            if (bottomSheetBehavior != null) bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+            showPoiSheet(p); // 카드 띄우기
+            if (kakaoMap != null) {
+                try {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(LatLng.from(p.lat, p.lng), 16));
+                } catch (Throwable ignore) {}
+            }
+            // ★ 서버 재조회 없이 스타일만 새로 그리기
+            applyFilter();
+            // 바텀시트는 사용자가 보고 있으니 그대로 두기 (원하면 유지/펼침 선택)
+            // bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
         rv.setAdapter(poiAdapter);
+
+        preparePoiSheetOverlay((ViewGroup) view);
 
         // ==== Map ====
         mapView = view.findViewById(R.id.map_view);
@@ -123,14 +163,25 @@ public class DirectionsFragment extends Fragment {
             @Override public void onMapReady(@NonNull KakaoMap map) {
                 kakaoMap = map;
                 labelLayer = kakaoMap.getLabelManager().getLayer();
-                pinStyles = buildPinStyles();
+                pinStylesNormal   = buildPinStyles(/*tint*/ null, /*s*/16,22,28);
+                pinStylesSmall    = buildPinStyles(0xFF9E9E9E /*회색*/, 12,16,20);
+                pinStylesSelected = buildPinStyles(0xFFFF3B30 /*빨강*/, 20,26,32);
                 fetchPoisFromServer(DEFAULT_CENTER.latitude, DEFAULT_CENTER.longitude, RADIUS, null);
             }
             @Override public LatLng getPosition() { return DEFAULT_CENTER; }
             @Override public int getZoomLevel() { return 14; }
             @Override public MapViewInfo getMapViewInfo() { return MapViewInfo.from("openmap", MapType.NORMAL); }
         });
-
+        mapView.setOnTouchListener((v, ev) -> {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                if (bottomSheetBehavior != null && bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                // 오버레이 열려있으면 닫을지 말지는 기획에 따라
+                // hidePoiSheet();
+            }
+            return false; // false: 지도 제스처는 그대로 동작
+        });
         // ==== Top controls ====
         initTopControls(view);
 
@@ -146,44 +197,131 @@ public class DirectionsFragment extends Fragment {
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
     }
+    private void setPeekHeightDp(int dpVal){
+        int px = dp(dpVal);
+        try { bottomSheetBehavior.setPeekHeight(px, true); }
+        catch (Throwable t){ bottomSheetBehavior.setPeekHeight(px); }
+    }
+
+    // 오버레이 준비 함수 교체
+    private void preparePoiSheetOverlay(ViewGroup root) {
+        overlayLayer = new FrameLayout(requireContext());
+        overlayLayer.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayLayer.setClickable(true);
+        overlayLayer.setVisibility(View.GONE);
+
+        // ★ 반투명 딤 배경
+        overlayLayer.setBackgroundColor(0x99000000); // #99000000 ≒ 60% 불투명
+
+        // 바깥(딤 영역) 클릭 시 오버레이 닫기 + 리스트 하단바는 접힘(또는 숨김)
+        overlayLayer.setOnClickListener(v -> {
+            hidePoiSheet();
+            if (bottomSheetBehavior != null)
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+
+        poiSheet = LayoutInflater.from(requireContext()).inflate(R.layout.sheet_poi, overlayLayer, false);
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
+        poiSheet.setLayoutParams(lp);
+        poiSheet.setClickable(true);
+
+        // ★ 시트 자체 배경(둥글고 흰색)과 그림자
+        poiSheet.setBackgroundResource(R.drawable.bg_sheet_rounded); // 아래 드로어블 추가
+        poiSheet.setElevation(dp(8));
+
+        tvTitle = poiSheet.findViewById(R.id.tvTitle);
+        ivPhoto = poiSheet.findViewById(R.id.ivPhoto);
+        tvAddr  = poiSheet.findViewById(R.id.tvAddr);
+        tvTel   = poiSheet.findViewById(R.id.tvTel);
+        poiSheet.findViewById(R.id.btnRoute).setOnClickListener(v -> {
+            Poi p = (Poi) poiSheet.getTag();
+            if (p != null) openKakaoRoute(p);
+        });
+
+        overlayLayer.addView(poiSheet);
+        root.addView(overlayLayer);
+    }
+
+
+
+    private void showPoiSheet(Poi p) {
+        overlayLayer.setVisibility(View.VISIBLE);
+        poiSheet.setVisibility(View.VISIBLE);
+        poiSheet.setTag(p);
+
+        tvTitle.setText(p.title == null ? "제목 없음" : p.title);
+        tvAddr.setText(p.addr == null ? "" : p.addr);
+        tvTel.setText(p.tel == null ? "" : p.tel);
+
+        if (p.image != null && !p.image.isEmpty()) {
+            Glide.with(this)
+                    .load(p.image)
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.drawable.image_gone)
+                    .into(ivPhoto);
+        } else {
+            ivPhoto.setImageResource(R.drawable.image_placeholder);
+        }
+
+        // 핀 클릭 시 리스트 바텀시트는 접기
+        if (bottomSheetBehavior != null) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    private void hidePoiSheet() {
+        if (overlayLayer != null) overlayLayer.setVisibility(View.GONE);
+        if (poiSheet != null) poiSheet.setVisibility(View.GONE);
+    }
 
     private void initTopControls(@NonNull View root) {
-        // 지역 드롭다운
+        // 👇 var 쓰지 말고 타입 명시
+        TextInputLayout til = root.findViewById(R.id.til_location);
         MaterialAutoCompleteTextView act = root.findViewById(R.id.act_location);
-        List<String> AREAS = Arrays.asList("전체","인제","홍천","횡성");
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, AREAS);
-        act.setAdapter(adapter);
-        act.setText("전체", false);
-        act.setOnClickListener(v -> act.showDropDown());
-        act.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) act.showDropDown(); });
-        act.setOnItemClickListener((parent, v, pos, id) -> {
-            switch (pos) {
-                case 0: moveAndSearch(POS_ALL, 11, 25_000); break;
-                case 1: moveAndSearch(POS_IJ, 14, RADIUS);  break;
-                case 2: moveAndSearch(POS_HC, 14, RADIUS);  break;
-                case 3: moveAndSearch(POS_HS, 14, RADIUS);  break;
-            }
-        });
 
-        // 칩 필터 (다중 선택)
-        ChipGroup chips = root.findViewById(R.id.chips_types);
-        Map<Integer,Integer> chipToType = new HashMap<>();
-        chipToType.put(R.id.chip_12, 12);
-        chipToType.put(R.id.chip_14, 14);
-        chipToType.put(R.id.chip_15, 15);
-        chipToType.put(R.id.chip_39, 39);
+        // 최초 표시
+        act.setText(AREAS[selectedAreaIndex], false);
 
-        chips.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            activeTypes.clear();
-            for (int id : checkedIds) {
-                Integer type = chipToType.get(id);
-                if (type != null) activeTypes.add(type);
-            }
-            // 선택이 0개면 빈 리스트(=지도/목록 비움)
-            applyFilter();
-        });
+        // 텍스트 클릭 → 다이얼로그
+        View.OnClickListener openDialog = v -> showAreaPickerDialog(act);
+        act.setOnClickListener(openDialog);
+        act.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showAreaPickerDialog(act); });
+
+        // end icon 클릭 → 다이얼로그
+        if (til != null) {
+            til.setEndIconOnClickListener(v -> showAreaPickerDialog(act));
+        }
     }
+
+    private void showAreaPickerDialog(@NonNull MaterialAutoCompleteTextView act) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("지역 선택")
+                .setSingleChoiceItems(AREAS, selectedAreaIndex, (d, which) -> {
+                    selectedAreaIndex = which;
+                    act.setText(AREAS[which], false);
+                    onAreaSelected(which);
+                    d.dismiss();
+                })
+                .show();
+    }
+
+    private void onAreaSelected(int pos) {
+        switch (pos) {
+            case 0: moveAndSearch(POS_ALL, 11, 25_000); break;
+            case 1: moveAndSearch(POS_IJ, 14, RADIUS);  break;
+            case 2: moveAndSearch(POS_HC, 14, RADIUS);  break;
+            case 3: moveAndSearch(POS_HS, 14, RADIUS);  break;
+        }
+    }
+
+
+    // 2) 다이얼로그 + 선택 처리
+    private static final String[] AREAS = {"전체","인제","홍천","횡성"};
+    private int selectedAreaIndex = 0; // “전체”로 시작
+
 
     // 카메라 이동 + 재조회
     private void moveAndSearch(LatLng target, int zoom, int radius) {
@@ -241,6 +379,8 @@ public class DirectionsFragment extends Fragment {
                 Log.e("POI", "request failed", e);
             }
             @Override public void onResponse(@NonNull Call call, @NonNull Response resp) throws IOException {
+                selectedPoiId = null;
+                hidePoiSheet();
                 if (!resp.isSuccessful()) {
                     Log.e("POI", "HTTP " + resp.code());
                     return;
@@ -265,29 +405,39 @@ public class DirectionsFragment extends Fragment {
 
         List<LabelOptions> opts = new ArrayList<>(pois.size());
         long rank = 1_000_000_000L;
+
         for (Poi p : pois) {
+            // ★ 스타일 결정: 선택되었으면 빨강, 아니면 (선택이 있을 때) 축소
+            LabelStyles styles;
+            if (selectedPoiId != null) {
+                styles = (p.id != null && p.id.equals(selectedPoiId)) ? pinStylesSelected : pinStylesSmall;
+            } else {
+                styles = pinStylesNormal;
+            }
+
             LabelOptions o = LabelOptions.from(LatLng.from(p.lat, p.lng))
-                    .setStyles(pinStyles)
+                    .setStyles(styles)
                     .setClickable(true)
                     .setTag(p)
                     .setRank(rank--);
+
             o.setTexts(new LabelTextBuilder().setTexts(safeTitle(p.title)));
             opts.add(o);
         }
         labelLayer.addLabels(opts);
 
+        // ★ 리스너: 위 3)에서 설명한 것으로 설정
         kakaoMap.setOnLabelClickListener((map, layer, label) -> {
             Object tag = label.getTag();
             if (tag instanceof Poi) {
                 Poi p = (Poi) tag;
-                // (옵션) 상세 바텀시트 사용 중이면 유지 가능
-                // showPoiBottomSheet(p);
-
-                // 목록 바텀시트 펼치고 해당 아이템 위치로 스크롤
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                int idx = poiAdapter.getCurrentList().indexOf(p);
-                RecyclerView rv = requireView().findViewById(R.id.rv_pois);
-                if (idx >= 0 && rv != null) rv.scrollToPosition(idx);
+                selectedPoiId = p.id;
+                if (bottomSheetBehavior != null) bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                showPoiSheet(p);
+                try {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(LatLng.from(p.lat, p.lng), 16));
+                } catch (Throwable ignore) {}
+                applyFilter();
                 return true;
             }
             return false;
@@ -295,18 +445,67 @@ public class DirectionsFragment extends Fragment {
     }
 
     // ===== 핀 스타일 =====
-    private LabelStyles buildPinStyles() {
+    private LabelStyles buildPinStyles(@Nullable Integer tint, int s, int m, int l) {
+        // 텍스트 스타일은 동일하게
         LabelTextStyle text = LabelTextStyle.from(14, 0xFF000000);
-        BitmapDrawable d = (BitmapDrawable) AppCompatResources.getDrawable(requireContext(), R.drawable.pin);
-        int s = dp(16), m = dp(22), l = dp(28);
-        LabelStyle ls = LabelStyle.from(Bitmap.createScaledBitmap(d.getBitmap(), s, s, true))
-                .setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(0);
-        LabelStyle lm = LabelStyle.from(Bitmap.createScaledBitmap(d.getBitmap(), m, m, true))
-                .setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(12);
-        LabelStyle ll = LabelStyle.from(Bitmap.createScaledBitmap(d.getBitmap(), l, l, true))
-                .setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(16);
+
+        Bitmap bmS = makePinBitmap(R.drawable.pin, s, tint);
+        Bitmap bmM = makePinBitmap(R.drawable.pin, m, tint);
+        Bitmap bmL = makePinBitmap(R.drawable.pin, l, tint);
+
+        LabelStyle ls = LabelStyle.from(bmS).setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(0);
+        LabelStyle lm = LabelStyle.from(bmM).setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(12);
+        LabelStyle ll = LabelStyle.from(bmL).setAnchorPoint(0.5f, 1.0f).setTextStyles(text).setZoomLevel(16);
         return LabelStyles.from(ls, lm, ll);
     }
+
+    private Bitmap makePinBitmap(int drawableRes, int sizeDp, @Nullable Integer tint) {
+        int px = dp(sizeDp);
+        android.graphics.drawable.Drawable dr = AppCompatResources.getDrawable(requireContext(), drawableRes);
+        if (dr == null) throw new IllegalStateException("pin drawable missing");
+        dr = dr.mutate();
+        if (tint != null) dr.setTint(tint);
+
+        android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bmp);
+        dr.setBounds(0, 0, px, px);
+        dr.draw(canvas);
+        return bmp;
+    }
+    private void openKakaoRoute(Poi p) {
+        // 목적지
+        double dlat = p.lat, dlng = p.lng;
+
+        // (선택) 출발지는 지도의 현재 중심을 사용. 못 구하면 생략하고 앱에서 현재위치로 처리하도록 시도
+        String spParam = null;
+        try {
+            LatLng center = kakaoMap != null ? kakaoMap.getCameraPosition().getPosition() : null;
+            if (center != null) spParam = String.format(Locale.US, "sp=%f,%f&", center.latitude, center.longitude);
+        } catch (Throwable ignore) {}
+
+        // 1차: KakaoMap 앱 스킴
+        String appUrl = "kakaomap://route?" +
+                (spParam != null ? spParam : "") +
+                String.format(Locale.US, "ep=%f,%f&by=car", dlat, dlng);
+
+        // 2차: 모바일웹 스킴(앱 없을 때)
+        String webUrl = "http://m.map.kakao.com/scheme/route?" +
+                (spParam != null ? spParam : "") +
+                String.format(Locale.US, "ep=%f,%f&by=car", dlat, dlng);
+
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(appUrl)));
+        } catch (Exception notInstalled) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl)));
+            } catch (Exception e) {
+                // 최종: 마켓 열기
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=net.daum.android.map")));
+            }
+        }
+    }
+
 
     private int dp(int dp) { return (int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()); }
