@@ -44,8 +44,8 @@ public class ApiService {
         public int visitCount;
         public String currentTitle;
     }
-    public void fetchVisitTimeline(Integer limit, Callback<List<VisitApi.VisitLogItem>> cb) {
-        visitApi.getTimeline(limit != null ? limit : 100).enqueue(new retrofit2.Callback<VisitApi.VisitTimelineRes>() {
+    public void fetchVisitTimeline(Long userId, Integer limit, Callback<List<VisitApi.VisitLogItem>> cb) {
+        visitApi.getTimeline(userId, limit != null ? limit : 100).enqueue(new retrofit2.Callback<VisitApi.VisitTimelineRes>() {
             @Override
             public void onResponse(retrofit2.Call<VisitApi.VisitTimelineRes> call, retrofit2.Response<VisitApi.VisitTimelineRes> res) {
                 if (res.isSuccessful() && res.body() != null) {
