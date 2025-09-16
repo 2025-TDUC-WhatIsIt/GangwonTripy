@@ -56,7 +56,7 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FaqViewHolder> {
 
         void bind(FaqItem item) {
             // 데이터 설정
-            String titleWithCategory = item.getCategory() + " " + item.getTitle();
+            String titleWithCategory = "[" + item.getCategory() + "] " + item.getTitle();
             titleTextView.setText(titleWithCategory);
             dateTextView.setText(item.getDate());
             contentTextView.setText(item.getContent());
