@@ -5,4 +5,51 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <!-- 툴바 스타일 -->
+    <style name="CustomToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@drawable/toolbar_background</item> // 배경
+        <item name="titleTextColor">@android:color/black</item> // 제목 텍스트 색상
+        <item name="android:textStyle">bold</item>
+        <item name="android:tint">@android:color/black</item> // 뒤로가기 버튼 등 아이콘 색상
+        <item name="android:elevation">4dp</item> // 툴바 그림자(선택)
+    </style>
+
+    <style name="BottomNavTextStyle" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="ProfileMenuItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingVertical">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="SubImageViewStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_rowWeight">1</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:background">#FFEB3B</item>
+        <item name="android:layout_margin">2dp</item>
+    </style>
+
+    <style name="CustomEditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:imeOptions">actionSearch</item>
+        <item name="maxLines">1</item>
+
+        <item name="android:textColor">#808080</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+    </style>
 </resources>
