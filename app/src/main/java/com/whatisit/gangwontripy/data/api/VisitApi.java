@@ -28,7 +28,7 @@ public interface VisitApi {
         public String message;
     }
     @GET("/api/visits/timeline")
-    Call<VisitTimelineRes> getTimeline(@Query("limit") Integer limit);
+    Call<VisitTimelineRes> getTimeline(@Header("X-USER-ID") long userId, @Query("limit") Integer limit);
 
     class VisitTimelineRes {
         public List<VisitLogItem> items;

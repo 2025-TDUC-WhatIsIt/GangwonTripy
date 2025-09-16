@@ -1,6 +1,8 @@
 // ui/mypage/visitlog/VisitLogFragment.java
 package com.whatisit.gangwontripy.ui.mypage.visitlog;
 
+import static androidx.lifecycle.AndroidViewModel_androidKt.getApplication;
+
 import com.whatisit.gangwontripy.R;
 
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.*;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.whatisit.gangwontripy.core.SessionManager;
 import com.whatisit.gangwontripy.data.api.ApiService;
 import com.whatisit.gangwontripy.data.api.VisitApi;
 import com.whatisit.gangwontripy.data.model.TimelineItem;
@@ -24,7 +27,7 @@ public class VisitLogFragment extends Fragment {
 
     private VisitLogAdapter adapter;
     private ApiService api;
-
+    private Long userId;
     private RecyclerView rv;
     private TextView emptyView;
     @Nullable
@@ -36,7 +39,16 @@ public class VisitLogFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        userId = SessionManager.getInstance(requireContext()).getUserId();
 
+        if (userId == null || userId <= 0L) {
+            // 로그인 정보 없으면 안내 후 리턴
+            emptyView.setText("로그인이 필요합니다.");
+            emptyView.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+            Toast.makeText(requireContext(), "세션 정보가 없습니다. 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         rv = view.findViewById(R.id.rv_visit_log);
         emptyView = view.findViewById(R.id.text_empty_visit_log);
 
@@ -56,7 +68,7 @@ public class VisitLogFragment extends Fragment {
         emptyView.setText("불러오는 중...");
         emptyView.setVisibility(View.VISIBLE);
 
-        api.fetchVisitTimeline(200, new ApiService.Callback<List<VisitApi.VisitLogItem>>() {
+        api.fetchVisitTimeline(userId,200, new ApiService.Callback<List<VisitApi.VisitLogItem>>() {
             @Override public void onSuccess(List<VisitApi.VisitLogItem> items) {
                 List<TimelineItem> timeline = buildTimeline(items);
                 adapter = new VisitLogAdapter(timeline);
@@ -75,6 +87,10 @@ public class VisitLogFragment extends Fragment {
                 rv.setVisibility(View.GONE);
                 emptyView.setText("방문 기록을 불러오지 못했습니다.");
                 emptyView.setVisibility(View.VISIBLE);
+
+                android.widget.Toast.makeText(requireContext(),
+                        "timeline 실패: " + (e.getMessage() == null ? "" : e.getMessage()),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
