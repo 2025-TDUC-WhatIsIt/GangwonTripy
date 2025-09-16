@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
+    android:gravity="center"
     tools:context=".ui.mypage.visitlog.VisitLogFragment">
 
     <!--
@@ -34,5 +35,13 @@
         android:paddingHorizontal="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_timeline_visit" />
-
+    <TextView
+        android:id="@+id/text_empty_visit_log"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:text="방문 기록이 없습니다."
+        android:gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </LinearLayout>
