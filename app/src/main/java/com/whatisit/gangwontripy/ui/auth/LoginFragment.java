@@ -44,8 +44,8 @@ public class LoginFragment extends Fragment {
         Button loginButton = view.findViewById(R.id.login_btn);
         ImageButton kakaoLoginButton = view.findViewById(R.id.login_kakao);
         TextView registerButton = view.findViewById(R.id.login_register);
-        TextView findAccountButton = view.findViewById(R.id.login_find_account);
-        TextView faqButton = view.findViewById(R.id.login_faq);
+//        TextView findAccountButton = view.findViewById(R.id.login_find_account);
+//        TextView faqButton = view.findViewById(R.id.login_faq);
 
         loginButton.setOnClickListener(v -> doLogin());
 

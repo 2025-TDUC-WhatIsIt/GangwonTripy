@@ -122,33 +122,33 @@
         app:layout_constraintTop_toBottomOf="@id/login_kakao"
         app:layout_constraintStart_toEndOf="@id/login_register" />
 
-    <TextView
-        android:id="@+id/login_find_account"
-        android:clickable="true"
-        android:layout_width="wrap_content"
-        android:layout_height="37dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginLeft="10dp"
-        android:text="계정 찾기"
-        android:textSize="12sp"
-        android:textAlignment="center"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/login_kakao"
-        app:layout_constraintStart_toEndOf="@id/login_register" />
+<!--    <TextView-->
+<!--        android:id="@+id/login_find_account"-->
+<!--        android:clickable="true"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="37dp"-->
+<!--        android:layout_marginTop="0dp"-->
+<!--        android:layout_marginLeft="10dp"-->
+<!--        android:text="계정 찾기"-->
+<!--        android:textSize="12sp"-->
+<!--        android:textAlignment="center"-->
+<!--        android:gravity="center"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/login_kakao"-->
+<!--        app:layout_constraintStart_toEndOf="@id/login_register" />-->
 
-    <TextView
-        android:id="@+id/login_faq"
-        android:clickable="true"
-        android:layout_width="wrap_content"
-        android:layout_height="37dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginLeft="10dp"
-        android:text="FAQ"
-        android:textSize="12sp"
-        android:textAlignment="center"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/login_kakao"
-        app:layout_constraintEnd_toEndOf="@id/login_kakao" />
+<!--    <TextView-->
+<!--        android:id="@+id/login_faq"-->
+<!--        android:clickable="true"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="37dp"-->
+<!--        android:layout_marginTop="0dp"-->
+<!--        android:layout_marginLeft="10dp"-->
+<!--        android:text="FAQ"-->
+<!--        android:textSize="12sp"-->
+<!--        android:textAlignment="center"-->
+<!--        android:gravity="center"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/login_kakao"-->
+<!--        app:layout_constraintEnd_toEndOf="@id/login_kakao" />-->
 
     <TextView
         android:layout_width="wrap_content"

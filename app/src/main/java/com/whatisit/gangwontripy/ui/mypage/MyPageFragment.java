@@ -54,15 +54,15 @@ public class MyPageFragment extends Fragment {
         TextView termsTextView = view.findViewById(R.id.menu_terms);
         TextView privacyTextView = view.findViewById(R.id.menu_privacy);
 
-        layoutBadge.setOnClickListener(v -> {
-            NavHostFragment.findNavController(MyPageFragment.this)
-                    .navigate(R.id.action_myPageFragment_to_badgeFragment);
-        });
-
-        layoutVisitLog.setOnClickListener(v -> {
-            NavHostFragment.findNavController(MyPageFragment.this)
-                    .navigate(R.id.action_myPageFragment_to_visitLogFragment);
-        });
+//        layoutBadge.setOnClickListener(v -> {
+//            NavHostFragment.findNavController(MyPageFragment.this)
+//                    .navigate(R.id.action_myPageFragment_to_badgeFragment);
+//        });
+//
+//        layoutVisitLog.setOnClickListener(v -> {
+//            NavHostFragment.findNavController(MyPageFragment.this)
+//                    .navigate(R.id.action_myPageFragment_to_visitLogFragment);
+//        });
       
         noticeTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)

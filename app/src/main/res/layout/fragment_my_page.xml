@@ -85,8 +85,9 @@
                 android:layout_marginStart="50dp"
                 android:padding="8dp"
                 android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
+                android:clickable="false"
+                android:focusable="false"
+                android:visibility="gone"
                 app:layout_constraintStart_toEndOf="@id/image_profile"
                 app:layout_constraintTop_toTopOf="@id/image_profile">
 
@@ -117,10 +118,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="8dp"
+                android:layout_marginStart="50dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                app:layout_constraintStart_toStartOf="@id/layout_badge"
+                app:layout_constraintStart_toEndOf="@id/image_profile"
                 app:layout_constraintTop_toBottomOf="@id/layout_badge">
             <TextView
                 android:id="@+id/text_my_title_title"
@@ -221,11 +223,11 @@
             android:text="로그아웃"
             app:drawableStartCompat="@drawable/ic_logout" />
 
-        <TextView
-            android:id="@+id/menu_withdraw"
-            style="@style/ProfileMenuItem"
-            android:text="회원탈퇴"
-            app:drawableStartCompat="@drawable/ic_withdraw" />
+<!--        <TextView-->
+<!--            android:id="@+id/menu_withdraw"-->
+<!--            style="@style/ProfileMenuItem"-->
+<!--            android:text="회원탈퇴"-->
+<!--            app:drawableStartCompat="@drawable/ic_withdraw" />-->
 
     </LinearLayout>
 
