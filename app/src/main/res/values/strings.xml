@@ -4,6 +4,10 @@
     <string name="splash_text">강원도 횡성, 홍전, 인제의\n지역화폐 가맹점을 담은</string>
     <string name="splash_teamname_text">Team. What is it</string>
 
+    <!-- 회원가입 약관 동의 -->
+    <string name="welcome_text">트리피에 오신 것을 환영합니다.</string>
+    <string name="welcome_text_detail">강원도의 산과 계곡을 한눈에 담다.\n우리 앱은 강원도 산간지역의 아름다운 자연과\n숨겨진 여행지를 쉽게 찾아볼 수 있도록 도와드립니다.\n지금 바로 강원도의 특별한 풍경을 경험해보세요.</string>
+
     <!-- 마이페이지 목록 -->
     <string name="my_page_list_text1">즐겨찾기</string>
     <string name="my_page_list_text2">진행중인 이벤트</string>
@@ -172,11 +176,6 @@
 
         <b>제9조 (분쟁 해결)</b><br><br>
         위치정보와 관련된 분쟁은 위치정보법 및 관련 법령에 따라 해결하며, 관할 법원은 운영팀이 소재하는 지역의 법원으로 합니다.<br><br><br>
-
-        <b>&lt;고지 문구&gt;</b><br><br>
-        <b>위치정보 수집·이용 안내</b><br><br>
-        강원Tripy는 인제·홍천·횡성 지역의 가맹점 안내 및 QR 방문 인증 서비스 제공을 위해사용자의 정확한 위치정보(GPS 등)를 수집·이용합니다.<br><br>
-        동의를 거부하실 수 있으나, 이 경우 일부 서비스 이용이 제한될 수 있습니다.<br>
         ]]>
     </string>
 

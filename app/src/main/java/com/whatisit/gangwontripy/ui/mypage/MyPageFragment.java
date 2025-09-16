@@ -58,11 +58,11 @@ public class MyPageFragment extends Fragment {
 //            NavHostFragment.findNavController(MyPageFragment.this)
 //                    .navigate(R.id.action_myPageFragment_to_badgeFragment);
 //        });
-//
-//        layoutVisitLog.setOnClickListener(v -> {
-//            NavHostFragment.findNavController(MyPageFragment.this)
-//                    .navigate(R.id.action_myPageFragment_to_visitLogFragment);
-//        });
+
+        layoutVisitLog.setOnClickListener(v -> {
+            NavHostFragment.findNavController(MyPageFragment.this)
+                    .navigate(R.id.action_myPageFragment_to_visitLogFragment);
+        });
       
         noticeTextView.setOnClickListener(v -> {
             NavHostFragment.findNavController(MyPageFragment.this)

@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -60,11 +61,17 @@ public class TermsFragment extends Fragment {
         // 1. "전체 동의" 레이아웃 클릭 시
         layoutAgreeAll.setOnClickListener(v -> {
             boolean isChecked = !checkboxAgreeAll.isChecked();
+            boolean shouldShowLbsPopup = !checkboxAgreeLbs.isChecked() && isChecked;
+
             checkboxAgreeAll.setChecked(isChecked);
             // 모든 자식 체크박스 상태를 '전체 동의'와 동일하게 설정
             checkboxAgreeTerms.setChecked(isChecked);
             checkboxAgreePersonal.setChecked(isChecked);
             checkboxAgreeLbs.setChecked(isChecked);
+
+            if (shouldShowLbsPopup) {
+                showLbsInfoDialog();
+            }
         });
 
         // 2. "이용약관" 레이아웃 클릭 시
@@ -82,6 +89,9 @@ public class TermsFragment extends Fragment {
         // 4. "위치기반" 레이아웃 클릭 시
         layoutAgreeLbs.setOnClickListener(v -> {
             checkboxAgreeLbs.toggle();
+            if (checkboxAgreeLbs.isChecked()) {
+                showLbsInfoDialog();
+            }
             updateAgreeAllCheckboxState();
         });
 
@@ -150,6 +160,18 @@ public class TermsFragment extends Fragment {
         return checkboxAgreeTerms.isChecked() &&
                 checkboxAgreePersonal.isChecked() &&
                 checkboxAgreeLbs.isChecked();
+    }
+
+    private void showLbsInfoDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("위치정보 수집·이용 안내")
+                .setMessage(
+                        "강원Tripy는 인제·홍천·횡성 지역의 가맹점 안내 및 QR 방문 인증 서비스 제공을 위해 " +
+                                "사용자의 정확한 위치정보(GPS 등)를 수집·이용합니다.\n\n" +
+                                "동의를 거부하실 수 있으나, 이 경우 일부 서비스 이용이 제한될 수 있습니다."
+                )
+                .setPositiveButton("확인", null)
+                .show();
     }
 
 //    @Override
