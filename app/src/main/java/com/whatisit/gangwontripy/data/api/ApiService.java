@@ -27,9 +27,11 @@ import okhttp3.*;
 
 public class ApiService {
 
+    private final VisitApi visitApi;
     private final Context app; // ✅ Application Context 보관
     public ApiService(Context context) {
         this.app = context.getApplicationContext();
+        this.visitApi = ApiClient.getRetrofit().create(VisitApi.class);
     }
     // 공공데이터 서버가 아니라 스프링 서버를 베이스
     private static final String API_BASE = BuildConfig.API_BASE;
@@ -42,7 +44,23 @@ public class ApiService {
         public int visitCount;
         public String currentTitle;
     }
+    public void fetchVisitTimeline(Integer limit, Callback<List<VisitApi.VisitLogItem>> cb) {
+        visitApi.getTimeline(limit != null ? limit : 100).enqueue(new retrofit2.Callback<VisitApi.VisitTimelineRes>() {
+            @Override
+            public void onResponse(retrofit2.Call<VisitApi.VisitTimelineRes> call, retrofit2.Response<VisitApi.VisitTimelineRes> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    cb.onSuccess(res.body().items != null ? res.body().items : java.util.Collections.emptyList());
+                } else {
+                    cb.onError(new RuntimeException("visit timeline failed: " + res.code()));
+                }
+            }
 
+            @Override
+            public void onFailure(retrofit2.Call<VisitApi.VisitTimelineRes> call, Throwable t) {
+                cb.onError(new RuntimeException(t));
+            }
+        });
+    }
     private String userIdOrThrow() {
         long uid = SessionManager.getInstance(app).getUserId();
         if (uid <= 0) throw new IllegalStateException("로그인이 필요합니다.");

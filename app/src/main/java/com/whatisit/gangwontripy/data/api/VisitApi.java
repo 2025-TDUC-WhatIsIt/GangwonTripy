@@ -27,4 +27,16 @@ public interface VisitApi {
         public List<String> newlyUnlocked;
         public String message;
     }
+    @GET("/api/visits/timeline")
+    Call<VisitTimelineRes> getTimeline(@Query("limit") Integer limit);
+
+    class VisitTimelineRes {
+        public List<VisitLogItem> items;
+    }
+    public static class VisitLogItem {
+        public Long id;
+        public String title;
+        public String visitedAt; // ISO-8601
+    }
+
 }

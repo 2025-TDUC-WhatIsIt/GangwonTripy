@@ -13,7 +13,7 @@ public class ApiClient {
     private static final String API_BASE = BuildConfig.API_BASE;
     private static Retrofit retrofit;
 
-    private static Retrofit getRetrofit() {
+    public static Retrofit getRetrofit() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(API_BASE) // 빌드 설정/환경에 맞게
