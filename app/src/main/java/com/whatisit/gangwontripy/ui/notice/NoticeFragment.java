@@ -51,7 +51,7 @@ public class NoticeFragment extends Fragment {
 
     private List<NoticeItem> createDummyNotice() {
         List<NoticeItem> list = new ArrayList<>();
-        list.add(new NoticeItem("주요공지", "공지제목", "2025.09.07", "공지 내용 작성중입니다."));
+        list.add(new NoticeItem("주요공지", "공지제목", "2025.09.15", "첫 공지"));
         return list;
     }
 }

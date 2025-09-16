@@ -56,7 +56,11 @@ public class DocumentFragment extends Fragment {
                     contentTextView.setText(Html.fromHtml(getString(R.string.privacy_content)));
                 }
             } else if ("LBS".equals(documentType)) {
-                contentTextView.setText(R.string.lbs_content);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.lbs_content), Html.FROM_HTML_MODE_LEGACY));
+                } else {
+                    contentTextView.setText(Html.fromHtml(getString(R.string.lbs_content)));
+                }
             }
         }
     }

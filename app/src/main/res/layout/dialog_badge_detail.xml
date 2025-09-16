@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="24dp"
+    android:background="@drawable/img_rectangle2"> <!-- 둥근 배경 -->
+
+    <!-- X 버튼 -->
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_gravity="end"/>
+
+    <ImageView
+        android:id="@+id/iv_dialog_badge_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/temp_ic_badge_placeholder"/>
+
+    <TextView
+        android:id="@+id/tv_dialog_badge_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="퀘스트 매니아(배지 이름)"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_dialog_badge_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="10개의 퀘스트 완료!\n당신은 진정한 모험가로 인정합니다!\n(조건 설명)"
+        android:gravity="center"/>
+
+    <Button
+        android:id="@+id/btn_apply_badge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="적용하기"/>
+</LinearLayout>
