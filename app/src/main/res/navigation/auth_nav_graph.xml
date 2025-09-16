@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/termsFragment"
         android:name="com.whatisit.gangwontripy.ui.auth.TermsFragment"
-        android:label=""
+        android:label="회원가입 약관 동의"
         tools:layout="@layout/fragment_terms">
         <action
             android:id="@+id/action_termsFragment_to_documentFragment"

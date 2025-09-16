@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">강원 Tripy</string>
     
+    <!-- 스플래시 -->
     <string name="splash_text">강원도 횡성, 홍전, 인제의\n지역화폐 가맹점을 담은</string>
     <string name="splash_teamname_text">Team. What is it</string>
 
@@ -178,5 +179,13 @@
         위치정보와 관련된 분쟁은 위치정보법 및 관련 법령에 따라 해결하며, 관할 법원은 운영팀이 소재하는 지역의 법원으로 합니다.<br><br><br>
         ]]>
     </string>
+
+    <!-- FAQ -->
+    <string name="faq_content_system">강원 Tripy는 강원도의 인제, 횡성, 홍천 세 지역의 지역화폐 가맹점 정보를 제공하고 여행 정보를 기록할 수 있는 서비스입니다. 세 지역의 가맹점 정보를 빠르고 쉽게 찾아볼 수 있으며, 가맹점에 방문해 QR코드를 촬영하여 나만의 여행 방문지를 자동으로 기록할 수 있습니다.</string>
+    <string name="faq_content_withdrawal">회원 탈퇴 방법은 다음과 같습니다.\n메인 화면으로 접속하신 뒤 [프로필] > [XXX] > [XXX] > 회원탈퇴</string>
+    <string name="faq_content_change_info">회원 정보 변경 방법은 다음과 같습니다.\n메인 화면으로 접속하신 뒤 [프로필] > [XXX] > [XXX] > 회원정보 변경</string>
+    <string name="faq_content_qr_error">QR 촬영 화면 하단의 플래시 기능을 이용해 재촬영을 시도하거나, 어플을 종료하신 후 재접속해주세요. 지속적으로 동일한 문제가 발생하는 경우 고객센터로 문의해주세요. (000–0000–0000)</string>
+    <string name="faq_content_app_error">– 기기의 OS버전과 앱이 최신 버전인지 확인해주세요. 앱이 최신 버전이 아니라면 스토어에 접속해 최신 업데이트를 진행해주세요.\n– 접속중인 기기의 인터넷 환경을 확인해주세요.\n지속적으로 동일한 문제가 발생하는 경우 고객센터로 문의해주세요. (000–0000–0000)</string>
+    <string name="faq_content_payment_error">강원 Tripy는 지역화폐 가맹점에 대한 정보만을 제공하는 어플리케이션입니다. 지역화폐 사용과정에서 생긴 불편함에 대한 신고는 강원상품권 홈페이지를 통해 접수 부탁드립니다.</string>
 
 </resources>

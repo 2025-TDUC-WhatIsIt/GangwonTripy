@@ -58,9 +58,13 @@ public class FaqFragment extends Fragment {
     // 테스트를 위한 가짜 데이터 생성 메소드
     private List<FaqItem> createDummyData() {
         List<FaqItem> list = new ArrayList<>();
-        list.add(new FaqItem("[시스템]", "강원 Tripy는 어떤 앱인가요?", "2025.08.13", "답변: 강원도 여행을 위한 최고의 앱입니다."));
-        list.add(new FaqItem("[회원]", "회원 탈퇴를 하고 싶습니다.", "2025.08.13", "답변: 마이페이지 > 설정 > 회원 탈퇴 메뉴를 이용해주세요."));
-        // ... (필요한 만큼 데이터 추가) ...
+        list.add(new FaqItem("시스템", "강원 Tripy는 어떤 앱인가요?", "2025.08.13", getString(R.string.faq_content_system)));
+        list.add(new FaqItem("회원", "회원 탈퇴를 하고싶습니다.", "2025.08.13", getString(R.string.faq_content_withdrawal)));
+        list.add(new FaqItem("회원", "연결된 전화번호나 이메일을 변경하고 싶습니다.", "2025.08.13", getString(R.string.faq_content_change_info)));
+        list.add(new FaqItem("오류", "QR 인식이 되지 않습니다.", "2025.08.13", getString(R.string.faq_content_qr_error)));
+        list.add(new FaqItem("오류", "앱 사용 중 강제로 종료되거나 원활하게 접속되지 않습니다.", "2025.08.13", getString(R.string.faq_content_app_error)));
+        list.add(new FaqItem("기타", "가맹점으로 등록되어있어 방문했는데, 지역화폐를 받아주지 않는 경우 어떻게 해야하나요?", "2025.08.13", getString(R.string.faq_content_payment_error)));
+
         return list;
     }
 }
