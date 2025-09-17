@@ -42,16 +42,16 @@ public class LoginFragment extends Fragment {
         etPw = view.findViewById(R.id.login_pw);
 
         Button loginButton = view.findViewById(R.id.login_btn);
-        ImageButton kakaoLoginButton = view.findViewById(R.id.login_kakao);
+//        ImageButton kakaoLoginButton = view.findViewById(R.id.login_kakao);
         TextView registerButton = view.findViewById(R.id.login_register);
 //        TextView findAccountButton = view.findViewById(R.id.login_find_account);
 //        TextView faqButton = view.findViewById(R.id.login_faq);
 
         loginButton.setOnClickListener(v -> doLogin());
 
-        kakaoLoginButton.setOnClickListener(v -> {
-            // TODO: 카카오 로그인 연동
-        });
+//        kakaoLoginButton.setOnClickListener(v -> {
+//            // TODO: 카카오 로그인 연동
+//        });
 
         registerButton.setOnClickListener(v -> {
 //            if (getActivity() instanceof LoginActivity){
