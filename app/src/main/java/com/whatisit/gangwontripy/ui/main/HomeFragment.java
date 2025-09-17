@@ -34,8 +34,11 @@ import com.whatisit.gangwontripy.data.api.FestivalCallback;
 import com.whatisit.gangwontripy.data.api.TourCallback;
 import com.whatisit.gangwontripy.data.model.BookmarkRes;
 import com.whatisit.gangwontripy.data.model.FestivalItem;
+import com.whatisit.gangwontripy.data.model.MagazineRes;
 import com.whatisit.gangwontripy.data.model.TouristSpotItem;
 import com.whatisit.gangwontripy.ui.main.home.FestivalAdapter;
+import com.whatisit.gangwontripy.ui.main.home.MagazineDetailBottomSheet;
+import com.whatisit.gangwontripy.ui.main.home.MagazinePagerAdapter;
 import com.whatisit.gangwontripy.ui.main.home.TouristSpotPagerAdapter;
 import com.whatisit.gangwontripy.ui.mypage.QrScanActivity;
 import com.whatisit.gangwontripy.ui.spot.SearchedSpotAdapter;
@@ -64,7 +67,8 @@ public class HomeFragment extends Fragment {
 
     // -------- 관광명소(ViewPager2) --------
     private ViewPager2 touristPager;
-    private TouristSpotPagerAdapter touristAdapter;
+    //private TouristSpotPagerAdapter touristAdapter;
+    private MagazinePagerAdapter magazineAdapter;
     private LinearLayout dotsTourist;                 // 관광명소 도트 컨테이너
     private static final int MAX_DOTS = 5;            // 최대 5개
 
@@ -100,8 +104,8 @@ public class HomeFragment extends Fragment {
     private final java.util.Set<String> savedIds = new java.util.HashSet<>();
     private final Runnable autoRunnable = new Runnable() {
         @Override public void run() {
-            if (touristPager != null && touristAdapter != null) {
-                int count = touristAdapter.getRealCount();
+            if (touristPager != null && magazineAdapter != null) {
+                int count = magazineAdapter.getRealCount();
                 if (count > 1) {
                     int next = (touristPager.getCurrentItem() + 1) % count;
                     touristPager.setCurrentItem(next, true);
@@ -204,8 +208,8 @@ public class HomeFragment extends Fragment {
 
         // --- 관광명소 ViewPager2 & 도트 세팅 ---
         touristPager = view.findViewById(R.id.viewpager_tourist);
-        touristAdapter = new TouristSpotPagerAdapter();
-        touristPager.setAdapter(touristAdapter);
+        magazineAdapter = new MagazinePagerAdapter();
+        touristPager.setAdapter(magazineAdapter);
         touristPager.setOffscreenPageLimit(1);
         dotsTourist = view.findViewById(R.id.dots_tourist);
 
@@ -221,7 +225,7 @@ public class HomeFragment extends Fragment {
                 }
             }
             @Override public void onPageSelected(int position) {
-                updateTouristDots(position, touristAdapter.getRealCount());
+                updateTouristDots(position, magazineAdapter.getRealCount());
             }
         });
 
@@ -252,6 +256,7 @@ public class HomeFragment extends Fragment {
         // --- 데이터 로드 ---
         fetchAllFestivals(festivalAdapter); // 축제
         fetchAllRegions();                  // 관광명소
+        fetchMagazines();
 
         // ----- 플로팅 카메라 셋업 -----
         View qrFab = view.findViewById(R.id.qrFab);
@@ -265,7 +270,37 @@ public class HomeFragment extends Fragment {
                 }
             });
         }
+        magazineAdapter.setOnMagazineClickListener(item -> {
+            MagazineDetailBottomSheet.newInstance(item)
+                    .show(getChildFragmentManager(), "mag_detail");
+        });
     }
+
+    private void startAutoSlideIfReady() {
+        stopAutoSlide();
+        if (magazineAdapter != null && magazineAdapter.getRealCount() > 1) {
+            autoHandler.postDelayed(autoRunnable, AUTO_DELAY_MS);
+        }
+    }
+    private void stopAutoSlide() { autoHandler.removeCallbacksAndMessages(null); }
+
+    private void fetchMagazines() {
+        apiService.fetchMagazines(new ApiService.Callback<java.util.List<MagazineRes>>() {
+            @Override public void onSuccess(java.util.List<MagazineRes> data) {
+                if (!isAdded()) return;
+                magazineAdapter.submitList(data);
+                setupTouristDots(magazineAdapter.getRealCount());
+                updateTouristDots(touristPager.getCurrentItem(), magazineAdapter.getRealCount());
+                startAutoSlideIfReady();
+            }
+            @Override public void onError(Exception e) {
+                // 실패 시 조용히 무시하거나 토스트
+                if (isAdded()) android.widget.Toast.makeText(requireContext(),"매거진 로드 실패", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // 기존 onAllRegionLoaded()에서는 뷰페이저 갱신 부분 삭제!
     private void onAllRegionLoaded(List<TouristSpotItem> all) {
         if (all.isEmpty()) return;
 
@@ -287,9 +322,9 @@ public class HomeFragment extends Fragment {
         naturalAll = withImg;
 
         // 기존 뷰페이저 노출/자동슬라이드 유지
-        touristAdapter.submitList(withImg);
+        /*touristAdapter.submitList(withImg);
         setupTouristDots(touristAdapter.getRealCount());
-        updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());
+        updateTouristDots(touristPager.getCurrentItem(), touristAdapter.getRealCount());*/
         startAutoSlideIfReady();
     }
 
@@ -735,15 +770,15 @@ public class HomeFragment extends Fragment {
         return (int) (v * d + 0.5f);
     }
 
-    private void startAutoSlideIfReady() {
+/*    private void startAutoSlideIfReady() {
         stopAutoSlide();
         if (touristAdapter != null && touristAdapter.getRealCount() > 1) {
             autoHandler.postDelayed(autoRunnable, AUTO_DELAY_MS);
         }
-    }
-    private void stopAutoSlide() {
+    }*/
+/*    private void stopAutoSlide() {
         autoHandler.removeCallbacksAndMessages(null);
-    }
+    }*/
 //    private void stopAutoSlide() {
 //        if (autoHandler != null){
 //            autoHandler.removeCallbacks(autoRunnable);

@@ -1,5 +1,7 @@
 package com.whatisit.gangwontripy.data.api;
 
+import static com.whatisit.gangwontripy.data.api.ApiClient.magazineApi;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.whatisit.gangwontripy.core.SessionManager;
 import com.whatisit.gangwontripy.data.model.BookmarkRes;
 import com.whatisit.gangwontripy.data.model.FestivalItem;
+import com.whatisit.gangwontripy.data.model.MagazineRes;
 import com.whatisit.gangwontripy.data.model.TouristSpotItem;
 
 import org.json.JSONArray;
@@ -44,6 +47,27 @@ public class ApiService {
         public int visitCount;
         public String currentTitle;
     }
+
+    public void fetchMagazines(Callback<List<MagazineRes>> cb) {
+        magazineApi().list().enqueue(new retrofit2.Callback<List<MagazineRes>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<MagazineRes>> call,
+                                   retrofit2.Response<List<MagazineRes>> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    cb.onSuccess(res.body());
+                } else {
+                    cb.onError(new RuntimeException("Magazine load failed: " + res.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<MagazineRes>> call, Throwable t) {
+                cb.onError(new RuntimeException(t));
+            }
+        });
+    }
+
+
     public void fetchVisitTimeline(Long userId, Integer limit, Callback<List<VisitApi.VisitLogItem>> cb) {
         visitApi.getTimeline(userId, limit != null ? limit : 100).enqueue(new retrofit2.Callback<VisitApi.VisitTimelineRes>() {
             @Override
