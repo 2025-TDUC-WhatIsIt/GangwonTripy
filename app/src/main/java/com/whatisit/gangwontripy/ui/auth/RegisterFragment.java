@@ -52,13 +52,13 @@ public class RegisterFragment extends Fragment {
         authApi = ApiClient.authApi();
 
         registAccountButton.setOnClickListener(view -> {
-            String username = safe(etUsername.getText()); // = email
+            String email = safe(etUsername.getText()); // = email
             String password = safe(etPassword.getText());
             String password2 = safe(etPassword2.getText());
             String nickname = safe(etNickname.getText());
 
             // 1) 간단 유효성
-            if (TextUtils.isEmpty(username)) { toast("아이디(이메일)를 입력해 주세요."); return; }
+            if (TextUtils.isEmpty(email)) { toast("아이디(이메일)를 입력해 주세요."); return; }
             if (TextUtils.isEmpty(password)) { toast("비밀번호를 입력해 주세요."); return; }
             if (!password.equals(password2)) { toast("비밀번호가 일치하지 않습니다."); return; }
             if (password.length() < 6) { toast("비밀번호는 6자 이상 권장합니다."); return; }
@@ -66,7 +66,7 @@ public class RegisterFragment extends Fragment {
 
             // 2) 요청
             setLoading(true);
-            SignupReq req = new SignupReq(username, password, nickname);
+            SignupReq req = new SignupReq(email, password, nickname);
             authApi.signup(req).enqueue(new Callback<LoginRes>() {
                 @Override
                 public void onResponse(Call<LoginRes> call, Response<LoginRes> res) {
