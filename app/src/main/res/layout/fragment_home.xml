@@ -7,8 +7,6 @@
     android:background="@android:color/white"
     tools:context=".ui.main.HomeFragment">
 
-
-
     <!-- 1. 앱 바 영역 (스크롤되지 않는 상단 부분) -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
@@ -23,6 +21,16 @@
             android:layout_height="wrap_content"
             android:background="@color/bright_green">
 
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+
+                android:src="@drawable/ic_icon_bg_512"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
             <!-- 검색창 -->
             <EditText
                 android:id="@+id/search_bar"
@@ -36,10 +44,17 @@
                 android:layout_marginEnd="55dp"
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/img_rectangle"
-                android:gravity="center"
+
+                android:gravity="center_vertical"
                 android:hint="검색어를 입력해주세요."
-                android:textColor="#808080"
+                android:textColorHint="@color/white"
+                android:textColor="@color/white"
                 android:textSize="14sp"
+
+                android:drawableStart="@drawable/ic_search_24"
+                android:drawablePadding="12dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
