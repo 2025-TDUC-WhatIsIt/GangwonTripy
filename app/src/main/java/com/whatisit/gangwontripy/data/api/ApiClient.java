@@ -12,6 +12,7 @@ public class ApiClient {
     private static VisitApi visitApi;
     private static final String API_BASE = BuildConfig.API_BASE;
     private static Retrofit retrofit;
+    private static MagazineApi magazineApi;
 
     public static Retrofit getRetrofit() {
         if (retrofit == null) {
@@ -25,6 +26,14 @@ public class ApiClient {
 
     public static AuthApi authApi() {
         return getRetrofit().create(AuthApi.class);
+    }
+
+    public static MagazineApi magazineApi() {
+        if (magazineApi == null) {
+            retrofit2.Retrofit r = getRetrofit();
+            magazineApi = r.create(MagazineApi.class);
+        }
+        return magazineApi;
     }
 
     public static VisitApi visitApi(){
