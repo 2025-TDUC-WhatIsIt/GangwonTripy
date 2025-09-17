@@ -15,6 +15,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.whatisit.gangwontripy.R;
 import com.whatisit.gangwontripy.data.api.ApiClient;
 import com.whatisit.gangwontripy.data.model.LoginReq;
@@ -80,7 +83,8 @@ public class LoginFragment extends Fragment {
                         ((LoginActivity) getActivity()).onLoginSuccess(body);
                     }
                 } else {
-                    Toast.makeText(requireContext(), "로그인 실패", Toast.LENGTH_SHORT).show();
+                    String msg = extractErrorMessage(res);
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -89,5 +93,33 @@ public class LoginFragment extends Fragment {
                 Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private String extractErrorMessage(Response<?> res) {
+        String fallback = "로그인 실패";
+        try {
+            if (res.errorBody() == null) return fallback;
+            String raw = res.errorBody().string();
+
+            JsonElement el = JsonParser.parseString(raw);
+            if (el.isJsonObject()) {
+                JsonObject o = el.getAsJsonObject();
+                // Spring Boot 3 (ProblemDetail)
+                if (o.has("detail") && !o.get("detail").isJsonNull()) {
+                    return o.get("detail").getAsString();
+                }
+                // Spring Boot 기본 에러 포맷
+                if (o.has("message") && !o.get("message").isJsonNull()) {
+                    return o.get("message").getAsString();
+                }
+                // OAuth류 포맷 대비
+                if (o.has("error_description") && !o.get("error_description").isJsonNull()) {
+                    return o.get("error_description").getAsString();
+                }
+            }
+            return fallback + " (" + res.code() + ")";
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 }
