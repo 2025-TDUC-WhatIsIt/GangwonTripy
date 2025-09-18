@@ -156,5 +156,25 @@
                 android:paddingBottom="24dp"/>
         </LinearLayout>
     </FrameLayout>
+    <!-- 로딩 오버레이 -->
+    <FrameLayout
+        android:id="@+id/progress_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="24dp">
 
+    <ProgressBar
+        android:id="@+id/progress_spinner"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="#9E9E9E"
+        android:indeterminateTintMode="src_in" />
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

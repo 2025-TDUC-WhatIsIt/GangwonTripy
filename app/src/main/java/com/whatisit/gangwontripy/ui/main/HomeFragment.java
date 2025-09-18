@@ -56,6 +56,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView searchResultRecyclerView;
     private ProgressBar loadingIndicator;
     private EditText searchBar;
+    // 축제 로딩 스피너
+    private View festivalProgress;
 
     private com.google.android.material.appbar.MaterialToolbar categoryToolbar;
     private boolean inCategoryMode = false;
@@ -158,6 +160,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         apiService = new ApiService(requireContext());
+        festivalProgress = view.findViewById(R.id.festival_progress);
+
         // XML의 뷰들을 코드와 연결
         defaultStateContainer = view.findViewById(R.id.default_state_container);
         searchResultRecyclerView = view.findViewById(R.id.search_result_recycler_view);
@@ -275,6 +279,18 @@ public class HomeFragment extends Fragment {
             MagazineDetailBottomSheet.newInstance(item)
                     .show(getChildFragmentManager(), "mag_detail");
         });
+    }
+    private void setFestivalLoading(boolean on) {
+        if (!isAdded()) return;
+        if (festivalProgress != null) festivalProgress.setVisibility(on ? View.VISIBLE : View.GONE);
+
+        if (festivalRv != null) {
+            festivalRv.setAlpha(on ? 0.3f : 1f);  // 로딩 중 살짝 흐리게
+            festivalRv.setEnabled(!on);           // 스크롤/터치 임시 비활성화
+        }
+        if (dotsFestival != null) {
+            dotsFestival.setVisibility(on ? View.INVISIBLE : View.VISIBLE);
+        }
     }
 
     private void startAutoSlideIfReady() {
@@ -584,6 +600,7 @@ public class HomeFragment extends Fragment {
 
     // 축제 데이터
     private void fetchAllFestivals(FestivalAdapter adapter) {
+        setFestivalLoading(true);
         List<FestivalItem> all = new ArrayList<>();
         AtomicInteger remain = new AtomicInteger(3);
 
@@ -603,6 +620,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void onAllFestivalsLoaded(List<FestivalItem> all, FestivalAdapter adapter) {
+        setFestivalLoading(false);
         if (all == null) all = new ArrayList<>();
         List<String> seen = new ArrayList<>();
         List<FestivalItem> dedup = new ArrayList<>();
