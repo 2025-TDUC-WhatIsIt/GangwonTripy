@@ -2,6 +2,7 @@
 package com.whatisit.gangwontripy.ui.directions;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -28,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -85,6 +87,9 @@ public class DirectionsFragment extends Fragment {
     private List<Poi> allPois = new ArrayList<>();
     private final Set<Integer> activeTypes = new HashSet<>(Arrays.asList(12,14,15,39)); // 처음엔 모두 선택
 
+    // ===== TopCard =====
+    private MaterialCardView cardControls;
+
     // ===== BottomSheet =====
     private BottomSheetBehavior<FrameLayout> bottomSheetBehavior;
     private PoiAdapter poiAdapter;
@@ -115,6 +120,7 @@ public class DirectionsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         progressOverlay = view.findViewById(R.id.progress_overlay);
         // ==== BottomSheet & Recycler ====
+        cardControls = view.findViewById(R.id.card_controls);
         FrameLayout bs = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bs);
         bottomSheetBehavior.setHideable(false);
@@ -123,13 +129,38 @@ public class DirectionsFragment extends Fragment {
 
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
+//        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+//            @Override public void onStateChanged(@NonNull View sheet, int newState) { /* no-op */ }
+//            @Override public void onSlide(@NonNull View sheet, float slideOffset) {
+//                // slideOffset: EXPANDED=1f, COLLAPSED≈0f, HIDDEN=-1f
+//                if (slideOffset < -0.25f) { // 충분히 내리면
+//                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+//                }
+//            }
+//        });
+
+        // 바텀시트 위치에 따라 상단 카드(카테고리 선택지) 숨김
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override public void onStateChanged(@NonNull View sheet, int newState) { /* no-op */ }
-            @Override public void onSlide(@NonNull View sheet, float slideOffset) {
-                // slideOffset: EXPANDED=1f, COLLAPSED≈0f, HIDDEN=-1f
-                if (slideOffset < -0.25f) { // 충분히 내리면
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                // 상태가 완전히 펼쳐졌을 때 (STATE_EXPANDED)
+                if (newState == BottomSheetBehavior.STATE_EXPANDED && cardControls != null) {
+                    cardControls.setVisibility(View.GONE);
                 }
+                // 상태가 접혔을 때 (STATE_COLLAPSED)
+                else if (newState == BottomSheetBehavior.STATE_COLLAPSED && cardControls != null) {
+                    cardControls.setVisibility(View.VISIBLE);
+                }
+            }
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                if (cardControls == null) return;
+                // slideOffset: 0 (접힘) ~ 1 (펼쳐짐)
+                // 부드러운 애니메이션을 위해 onSlide에서도 alpha 값을 조절할 수 있습니다.
+                // slideOffset이 0.5 이상으로 올라가면 점점 투명하게 만듦
+                float alpha = 1.0f - (slideOffset * 2);
+                if (alpha < 0) alpha = 0;
+                cardControls.setAlpha(alpha);
             }
         });
 
@@ -288,18 +319,34 @@ public class DirectionsFragment extends Fragment {
         TextInputLayout til = root.findViewById(R.id.til_location);
         MaterialAutoCompleteTextView act = root.findViewById(R.id.act_location);
 
+        Context context = getContext();
+        if (context != null) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    context,
+                    android.R.layout.simple_dropdown_item_1line,
+                    AREAS
+            );
+            act.setAdapter(adapter);
+        }
+
         // 최초 표시
         act.setText(AREAS[selectedAreaIndex], false);
 
-        // 텍스트 클릭 → 다이얼로그
-        View.OnClickListener openDialog = v -> showAreaPickerDialog(act);
-        act.setOnClickListener(openDialog);
-        act.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showAreaPickerDialog(act); });
+        // 아이템을 클릭했을 때의 동작을 정의합니다.
+        act.setOnItemClickListener((parent, view, position, id) -> {
+            selectedAreaIndex = position;
+            onAreaSelected(position);
+        });
 
-        // end icon 클릭 → 다이얼로그
-        if (til != null) {
-            til.setEndIconOnClickListener(v -> showAreaPickerDialog(act));
-        }
+//        // 텍스트 클릭 → 다이얼로그
+//        View.OnClickListener openDialog = v -> showAreaPickerDialog(act);
+//        act.setOnClickListener(openDialog);
+//        act.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showAreaPickerDialog(act); });
+//
+//        // end icon 클릭 → 다이얼로그
+//        if (til != null) {
+//            til.setEndIconOnClickListener(v -> showAreaPickerDialog(act));
+//        }
     }
 
     private void showAreaPickerDialog(@NonNull MaterialAutoCompleteTextView act) {
