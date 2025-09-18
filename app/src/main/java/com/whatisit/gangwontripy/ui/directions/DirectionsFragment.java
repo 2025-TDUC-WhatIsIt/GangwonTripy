@@ -380,7 +380,7 @@ public class DirectionsFragment extends Fragment {
             }
             @Override public void onResponse(@NonNull Call call, @NonNull Response resp) throws IOException {
                 selectedPoiId = null;
-                hidePoiSheet();
+
                 if (!resp.isSuccessful()) {
                     Log.e("POI", "HTTP " + resp.code());
                     return;
@@ -391,12 +391,23 @@ public class DirectionsFragment extends Fragment {
 
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
+                    hidePoiSheet();
                     allPois = (pois != null) ? pois : new ArrayList<>();
                     applyFilter();
                 });
             }
         });
     }
+    private static boolean isFinite(double v) {
+        return !Double.isNaN(v) && !Double.isInfinite(v);
+    }
+    private static boolean validLatLng(double lat, double lng) {
+        return isFinite(lat) && isFinite(lng)
+                && lat >= -90.0 && lat <= 90.0
+                && lng >= -180.0 && lng <= 180.0
+                && !(lat == 0.0 && lng == 0.0); // 0,0 은 잘못된 좌표로 취급
+    }
+    private static String nz(String s) { return (s == null) ? "" : s; }
 
     // ===== 마커 렌더 =====
     private void renderPois(List<Poi> pois) {
@@ -407,6 +418,10 @@ public class DirectionsFragment extends Fragment {
         long rank = 1_000_000_000L;
 
         for (Poi p : pois) {
+            if (!validLatLng(p.lat, p.lng)) {
+                Log.w("POI", "Skip invalid coord: id=" + nz(p.id) + " lat=" + p.lat + " lng=" + p.lng);
+                continue;
+            }
             // ★ 스타일 결정: 선택되었으면 빨강, 아니면 (선택이 있을 때) 축소
             LabelStyles styles;
             if (selectedPoiId != null) {
@@ -421,21 +436,35 @@ public class DirectionsFragment extends Fragment {
                     .setTag(p)
                     .setRank(rank--);
 
-            o.setTexts(new LabelTextBuilder().setTexts(safeTitle(p.title)));
+            o.setTexts(new com.kakao.vectormap.label.LabelTextBuilder().setTexts(safeTitle(p.title)));
             opts.add(o);
         }
-        labelLayer.addLabels(opts);
+        if (opts.isEmpty()) return;
+        try {
+            labelLayer.addLabels(opts);
+        } catch (RuntimeException e) {
+            Log.e("POI", "addLabels failed: " + e.getMessage() + " — will bisect add", e);
+            for (int i = 0; i < opts.size(); i++) {
+                try {
+                    labelLayer.addLabels(java.util.Collections.singletonList(opts.get(i)));
+                } catch (RuntimeException one) {
+                    Log.e("POI", "Bad LabelOptions at index=" + i
+                            + " (id=" + ((Poi)opts.get(i).getTag()).id + "): " + one.getMessage());
+                }
+            }
+        }
 
-        // ★ 리스너: 위 3)에서 설명한 것으로 설정
         kakaoMap.setOnLabelClickListener((map, layer, label) -> {
             Object tag = label.getTag();
             if (tag instanceof Poi) {
                 Poi p = (Poi) tag;
                 selectedPoiId = p.id;
-                if (bottomSheetBehavior != null) bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (bottomSheetBehavior != null)
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 showPoiSheet(p);
                 try {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(LatLng.from(p.lat, p.lng), 16));
+                    kakaoMap.moveCamera(CameraUpdateFactory
+                            .newCenterPosition(com.kakao.vectormap.LatLng.from(p.lat, p.lng), 16));
                 } catch (Throwable ignore) {}
                 applyFilter();
                 return true;
