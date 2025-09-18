@@ -229,7 +229,19 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_recommend_restaurant" />
-
+            <ProgressBar
+                android:id="@+id/festival_progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:indeterminate="true"
+                android:indeterminateTint="#9E9E9E"
+                android:indeterminateTintMode="src_in"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/recycler_view_festival"
+                app:layout_constraintBottom_toBottomOf="@id/recycler_view_festival"
+                app:layout_constraintStart_toStartOf="@id/recycler_view_festival"
+                app:layout_constraintEnd_toEndOf="@id/recycler_view_festival"/>
             <!-- 페이지 표시 점들 -->
             <LinearLayout
                 android:id="@+id/dots_indicator_festival"
