@@ -113,6 +113,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onLoginSuccess(LoginRes res) {
+        if (res == null || res.userId == null || res.userId <= 0) {
+            android.widget.Toast.makeText(this, "로그인 정보 저장에 실패했습니다.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
         SessionManager.getInstance(this).saveLogin(res);
 
         Intent intent = new Intent(this, MainActivity.class);

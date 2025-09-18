@@ -1,11 +1,11 @@
+// app/.../data/model/LoginRes.java
 package com.whatisit.gangwontripy.data.model;
+import androidx.annotation.Keep;
+import com.google.gson.annotations.SerializedName;
 
+@Keep
 public class LoginRes {
-    public Long userId;
-    public String nickname;
-    public String profileImageUrl;
-
-    public Long getUserId() { return userId; }
-    public String getNickname() { return nickname; }
-    public String getProfileImageUrl() { return profileImageUrl; }
+    @SerializedName("userId")         public Long userId;
+    @SerializedName("nickname")       public String nickname;
+    @SerializedName("profileImageUrl")public String profileImageUrl;
 }
