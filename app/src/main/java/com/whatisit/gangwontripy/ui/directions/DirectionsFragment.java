@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 import okhttp3.*;
 
 public class DirectionsFragment extends Fragment {
-
+    private View progressOverlay;
     // ===== Kakao Map =====
     private MapView mapView;
     private KakaoMap kakaoMap;
@@ -113,7 +113,7 @@ public class DirectionsFragment extends Fragment {
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        progressOverlay = view.findViewById(R.id.progress_overlay);
         // ==== BottomSheet & Recycler ====
         FrameLayout bs = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bs);
@@ -201,6 +201,12 @@ public class DirectionsFragment extends Fragment {
         int px = dp(dpVal);
         try { bottomSheetBehavior.setPeekHeight(px, true); }
         catch (Throwable t){ bottomSheetBehavior.setPeekHeight(px); }
+    }
+    private void setLoading(boolean on) {
+        if (!isAdded()) return;
+        if (progressOverlay != null) {
+            progressOverlay.setVisibility(on ? View.VISIBLE : View.GONE);
+        }
     }
 
     // 오버레이 준비 함수 교체
@@ -372,17 +378,21 @@ public class DirectionsFragment extends Fragment {
                 + "?lat=" + lat + "&lng=" + lng + "&radius=" + radius
                 + (typesCsv != null ? "&types=" + Uri.encode(typesCsv) : "")
                 + "&page=1&size=60";
-
+        setLoading(true);
         Request req = new Request.Builder().url(url).get().build();
         http.newCall(req).enqueue(new Callback() {
             @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e("POI", "request failed", e);
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> setLoading(false));
             }
             @Override public void onResponse(@NonNull Call call, @NonNull Response resp) throws IOException {
                 selectedPoiId = null;
 
                 if (!resp.isSuccessful()) {
                     Log.e("POI", "HTTP " + resp.code());
+                    if (!isAdded()) return;
+                    requireActivity().runOnUiThread(() -> setLoading(false));
                     return;
                 }
                 String json = resp.body().string();
@@ -394,6 +404,7 @@ public class DirectionsFragment extends Fragment {
                     hidePoiSheet();
                     allPois = (pois != null) ? pois : new ArrayList<>();
                     applyFilter();
+                    setLoading(false);
                 });
             }
         });
