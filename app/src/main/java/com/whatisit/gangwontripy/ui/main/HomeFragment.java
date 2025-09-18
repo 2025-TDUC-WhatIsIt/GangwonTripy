@@ -104,14 +104,13 @@ public class HomeFragment extends Fragment {
     private final java.util.Set<String> savedIds = new java.util.HashSet<>();
     private final Runnable autoRunnable = new Runnable() {
         @Override public void run() {
-            if (touristPager != null && magazineAdapter != null) {
-                int count = magazineAdapter.getRealCount();
-                if (count > 1) {
-                    int next = (touristPager.getCurrentItem() + 1) % count;
-                    touristPager.setCurrentItem(next, true);
-                    autoHandler.postDelayed(this, AUTO_DELAY_MS);
-                }
-            }
+            if (!isAdded() || getView() == null || touristPager == null || magazineAdapter == null)
+                return;
+            int count = magazineAdapter.getRealCount();
+            if (count <= 1) return;
+            int next = (touristPager.getCurrentItem() + 1) % count;
+            touristPager.setCurrentItem(next, true);
+            if (isAdded()) autoHandler.postDelayed(this, AUTO_DELAY_MS);
         }
     };
 
@@ -130,16 +129,21 @@ public class HomeFragment extends Fragment {
     private PagerSnapHelper festivalSnapHelper;
     private final Handler festivalAutoHandler = new Handler(Looper.getMainLooper());
     private final long FESTIVAL_AUTO_DELAY_MS = 3000L;
+
+    private ViewPager2.OnPageChangeCallback vpCallback;
+    private RecyclerView.OnScrollListener festivalScrollListener;
+
+
     private final Runnable festivalAutoRunnable = new Runnable() {
         @Override public void run() {
-            if (festivalRv == null || festivalAdapter == null) return;
+            if (!isAdded() || getView()==null ||festivalRv == null || festivalAdapter == null) return;
             int count = festivalAdapter.getItemCount();
             if (count <= 1) return;
             int cur = getSnappedPosition(festivalRv, festivalSnapHelper);
             if (cur == RecyclerView.NO_POSITION) cur = 0;
             int next = (cur + 1) % count;
             festivalRv.smoothScrollToPosition(next);
-            festivalAutoHandler.postDelayed(this, FESTIVAL_AUTO_DELAY_MS);
+            if (isAdded()) festivalAutoHandler.postDelayed(this, FESTIVAL_AUTO_DELAY_MS);
         }
     };
 
@@ -213,21 +217,20 @@ public class HomeFragment extends Fragment {
         touristPager.setOffscreenPageLimit(1);
         dotsTourist = view.findViewById(R.id.dots_tourist);
 
-        touristPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        vpCallback = new ViewPager2.OnPageChangeCallback() {
             private boolean userDragging = false;
             @Override public void onPageScrollStateChanged(int state) {
-                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                    userDragging = true;
-                    stopAutoSlide();
-                } else if (state == ViewPager2.SCROLL_STATE_IDLE && userDragging) {
-                    userDragging = false;
-                    startAutoSlideIfReady();
-                }
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) { userDragging = true; stopAutoSlide(); }
+                else if (state == ViewPager2.SCROLL_STATE_IDLE && userDragging) { userDragging = false; startAutoSlideIfReady(); }
             }
             @Override public void onPageSelected(int position) {
                 updateTouristDots(position, magazineAdapter.getRealCount());
             }
-        });
+        };
+
+
+        touristPager.registerOnPageChangeCallback(vpCallback);
+
 
         // --- 축제 RecyclerView & 도트 세팅 ---
         festivalRv = view.findViewById(R.id.recycler_view_festival);
@@ -237,21 +240,19 @@ public class HomeFragment extends Fragment {
         festivalSnapHelper = new PagerSnapHelper();
         festivalSnapHelper.attachToRecyclerView(festivalRv);
         dotsFestival = view.findViewById(R.id.dots_indicator_festival);
-
-        festivalRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        festivalScrollListener = new RecyclerView.OnScrollListener() {
             private boolean userDragging = false;
             @Override public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    userDragging = true;
-                    festivalStopAutoSlide();
-                } else if (newState == RecyclerView.SCROLL_STATE_IDLE && userDragging) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) { userDragging = true; festivalStopAutoSlide(); }
+                else if (newState == RecyclerView.SCROLL_STATE_IDLE && userDragging) {
                     userDragging = false;
                     int pos = getSnappedPosition(festivalRv, festivalSnapHelper);
                     updateFestivalDots(pos == RecyclerView.NO_POSITION ? 0 : pos, festivalAdapter.getItemCount());
                     festivalStartAutoSlideIfReady();
                 }
             }
-        });
+        };
+        festivalRv.addOnScrollListener(festivalScrollListener);
 
         // --- 데이터 로드 ---
         fetchAllFestivals(festivalAdapter); // 축제
@@ -278,7 +279,8 @@ public class HomeFragment extends Fragment {
 
     private void startAutoSlideIfReady() {
         stopAutoSlide();
-        if (magazineAdapter != null && magazineAdapter.getRealCount() > 1) {
+        if (!isAdded() || getView()==null || touristPager==null || magazineAdapter==null) return;
+        if (magazineAdapter.getRealCount() > 1) {
             autoHandler.postDelayed(autoRunnable, AUTO_DELAY_MS);
         }
     }
@@ -407,22 +409,16 @@ public class HomeFragment extends Fragment {
         showSearchResultState();
     }
     private int getActionBarSize() {
-        TypedValue tv = new TypedValue();
-        // 1) framework
-        if (requireContext().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        android.content.Context ctx = getContext();
+        if (ctx != null) {
+            TypedValue tv = new TypedValue();
+            if (ctx.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+                return TypedValue.complexToDimensionPixelSize(tv.data, ctx.getResources().getDisplayMetrics());
+            if (ctx.getTheme().resolveAttribute(androidx.appcompat.R.attr.actionBarSize, tv, true))
+                return TypedValue.complexToDimensionPixelSize(tv.data, ctx.getResources().getDisplayMetrics());
+            if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.actionBarSize, tv, true))
+                return TypedValue.complexToDimensionPixelSize(tv.data, ctx.getResources().getDisplayMetrics());
         }
-        // 2) appcompat fallback
-        if (requireContext().getTheme().resolveAttribute(
-                androidx.appcompat.R.attr.actionBarSize, tv, true)) {
-            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-        }
-        // 3) material fallback
-        if (requireContext().getTheme().resolveAttribute(
-                com.google.android.material.R.attr.actionBarSize, tv, true)) {
-            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-        }
-        // 최종: 기본값(보통 56dp)
         return dp(56);
     }
 
@@ -654,6 +650,7 @@ public class HomeFragment extends Fragment {
 
     // 관광명소 도트
     private void setupTouristDots(int total) {
+        if (!isAdded() || getView()==null || getContext()==null) return;
         if (dotsTourist == null) return;
         dotsTourist.removeAllViews();
         int visibleDots = Math.min(total, MAX_DOTS);
@@ -671,6 +668,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateTouristDots(int position, int total) {
+        if (!isAdded() || getView()==null || getContext()==null) return;
         if (dotsTourist == null || dotsTourist.getChildCount() == 0 || total == 0) return;
         int visible = Math.min(total, MAX_DOTS);
         int half = visible / 2; // 5 -> 2
@@ -766,7 +764,9 @@ public class HomeFragment extends Fragment {
     }
 
     private int dp(int v) {
-        float d = getResources().getDisplayMetrics().density;
+        android.content.Context c = getContext();
+        android.content.res.Resources r = (c != null) ? c.getResources() : android.content.res.Resources.getSystem();
+        float d = r.getDisplayMetrics().density;
         return (int) (v * d + 0.5f);
     }
 
@@ -811,8 +811,31 @@ public class HomeFragment extends Fragment {
         festivalStopAutoSlide();
     }
     @Override public void onDestroyView() {
+        // 1) 핸들러 콜백 전부 제거
         stopAutoSlide();
         festivalStopAutoSlide();
+
+        // 2) 리스너/콜백 해제
+        if (touristPager != null && vpCallback != null) {
+            touristPager.unregisterOnPageChangeCallback(vpCallback);
+            vpCallback = null;
+        }
+        if (festivalRv != null && festivalScrollListener != null) {
+            festivalRv.removeOnScrollListener(festivalScrollListener);
+            festivalScrollListener = null;
+        }
+
+        // 3) 어댑터 분리(뷰 참조 끊기)
+        if (touristPager != null) touristPager.setAdapter(null);
+        if (festivalRv != null)    festivalRv.setAdapter(null);
+
+        // 4) 뷰 레퍼런스도 끊어 메모리누수/후행콜백 방지
+        touristPager = null;
+        dotsTourist = null;
+        festivalRv = null;
+        dotsFestival = null;
+
         super.onDestroyView();
     }
+
 }
