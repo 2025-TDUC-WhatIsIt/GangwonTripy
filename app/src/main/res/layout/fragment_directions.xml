@@ -35,20 +35,26 @@
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:endIconMode="custom"
-                app:endIconDrawable="@drawable/ic_expand_more_24">
+                android:hint="지역 선택">
+<!--                app:endIconMode="custom"-->
+<!--                app:endIconDrawable="@drawable/ic_expand_more_24">-->
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/act_location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="지역"
-                android:focusable="false"
-                android:clickable="true"
-                android:cursorVisible="false"
-                android:inputType="none"
-                android:importantForAutofill="no"
-                android:maxLines="1"/>
+<!--            <com.google.android.material.textfield.MaterialAutoCompleteTextView-->
+<!--                android:id="@+id/act_location"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="지역"-->
+<!--                android:focusable="false"-->
+<!--                android:clickable="true"-->
+<!--                android:cursorVisible="false"-->
+<!--                android:inputType="none"-->
+<!--                android:importantForAutofill="no"-->
+<!--                android:maxLines="1"/>-->
+                <AutoCompleteTextView
+                    android:id="@+id/act_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
