@@ -21,3 +21,15 @@
 #-renamesourcefileattribute SourceFile
 -keepattributes *Annotation*
 -keep class com.whatisit.gangwontripy.data.model.** { *; }
+
+# ===================================================================
+# GSON 라이브러리에서 사용하는 데이터 모델 클래스들은 절대 건드리지 않도록 설정
+# (클래스 이름, 필드, 메소드 모두 유지)
+# ===================================================================
+# 아래에 GSON으로 파싱하는 모든 모델 클래스의 전체 경로를 추가해주세요.
+
+-keep class com.whatisit.gangwontripy.ui.directions.DirectionsFragment$Poi { *; }
+-keep class com.whatisit.gangwontripy.data.model.VisitItem { *; }
+-keep class com.whatisit.gangwontripy.data.model.YearItem { *; }
+-keep class com.whatisit.gangwontripy.data.model.TouristSpotItem { *; }
+# ... (다른 모델 클래스가 있다면 계속 추가)
