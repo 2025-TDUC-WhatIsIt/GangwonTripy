@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +23,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.MenuHost;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,6 +44,7 @@ import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapType;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.MapViewInfo;
+import com.kakao.vectormap.Poi;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 import com.kakao.vectormap.label.LabelLayer;
 import com.kakao.vectormap.label.LabelOptions;
@@ -347,6 +350,31 @@ public class DirectionsFragment extends Fragment {
 //        if (til != null) {
 //            til.setEndIconOnClickListener(v -> showAreaPickerDialog(act));
 //        }
+
+        // --- 2. 카테고리 필터 (ChipGroup) 설정 ---
+
+        ChipGroup chipGroup = root.findViewById(R.id.chips_types);
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            // activeTypes를 비우고, 현재 체크된 Chip들의 ID에 해당하는 contentTypeId를 다시 추가합니다.
+            activeTypes.clear();
+
+            // checkedIds는 Chip의 ID 리스트입니다. (예: [R.id.chip_12, R.id.chip_15])
+            for (int id : checkedIds) {
+                if (id == R.id.chip_12) {
+                    activeTypes.add(12);
+                } else if (id == R.id.chip_14) {
+                    activeTypes.add(14);
+                } else if (id == R.id.chip_15) {
+                    activeTypes.add(15);
+                } else if (id == R.id.chip_39) {
+                    activeTypes.add(39);
+                }
+            }
+
+            // 칩 상태가 변경되었으므로, 현재 지도에 표시된 마커와 리스트를
+            // 새로운 필터(activeTypes)에 맞게 다시 렌더링합니다.
+            applyFilter();
+        });
     }
 
     private void showAreaPickerDialog(@NonNull MaterialAutoCompleteTextView act) {
@@ -405,7 +433,7 @@ public class DirectionsFragment extends Fragment {
     }
 
     private void applyFilter() {
-        if (!isAdded()) return;
+        if (!isAdded() || poiAdapter == null) return;
         List<Poi> filtered = (allPois == null) ? Collections.emptyList()
                 : allPois.stream().filter(p -> activeTypes.contains(p.contentTypeId)).collect(Collectors.toList());
 
@@ -430,24 +458,68 @@ public class DirectionsFragment extends Fragment {
         http.newCall(req).enqueue(new Callback() {
             @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e("POI", "request failed", e);
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> setLoading(false));
+
+//                if (!isAdded()) return;
+//                requireActivity().runOnUiThread(() -> setLoading(false));
+
+                // getActivity()를 사용하여 Activity 참조를 가져옴
+                final FragmentActivity activity = getActivity();
+                // Activity가 null이면 (Fragment가 detach된 상태) 아무것도 하지 않고 종료
+                if (activity == null) {
+                    return;
+                }
+
+                // Activity의 runOnUiThread를 사용하여 메인 스레드에서 UI 작업 실행
+                activity.runOnUiThread(() -> {
+                    // 메인 스레드에서 isAdded()를 한번 더 확인하여 이중으로 안전장치 마련
+                    if (!isAdded()) {
+                        return;
+                    }
+                    setLoading(false);
+                    Toast.makeText(getContext(), "데이터를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                });
             }
             @Override public void onResponse(@NonNull Call call, @NonNull Response resp) throws IOException {
                 selectedPoiId = null;
 
+//                if (!resp.isSuccessful()) {
+//                    Log.e("POI", "HTTP " + resp.code());
+//                    if (!isAdded()) return;
+//                    requireActivity().runOnUiThread(() -> setLoading(false));
+//                    return;
+//                }
                 if (!resp.isSuccessful()) {
                     Log.e("POI", "HTTP " + resp.code());
-                    if (!isAdded()) return;
-                    requireActivity().runOnUiThread(() -> setLoading(false));
+
+                    final FragmentActivity activity = getActivity();
+                    if (activity == null) return;
+
+                    activity.runOnUiThread(() -> {
+                        if (!isAdded()) return;
+                        setLoading(false);
+                        Toast.makeText(getContext(), "오류가 발생했습니다: " + resp.code(), Toast.LENGTH_SHORT).show();
+                    });
                     return;
                 }
+
                 String json = resp.body().string();
                 Type listType = new TypeToken<List<Poi>>(){}.getType();
                 List<Poi> pois = gson.fromJson(json, listType);
 
-                if (!isAdded()) return;
-                requireActivity().runOnUiThread(() -> {
+//                if (!isAdded()) return;
+//                requireActivity().runOnUiThread(() -> {
+//                    hidePoiSheet();
+//                    allPois = (pois != null) ? pois : new ArrayList<>();
+//                    applyFilter();
+//                    setLoading(false);
+//                });
+
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) return;
+
                     hidePoiSheet();
                     allPois = (pois != null) ? pois : new ArrayList<>();
                     applyFilter();
