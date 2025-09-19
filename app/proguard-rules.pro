@@ -21,3 +21,9 @@
 #-renamesourcefileattribute SourceFile
 -keepattributes *Annotation*
 -keep class com.whatisit.gangwontripy.data.model.** { *; }
+
+# Kakao Vector Map v2
+-keep class com.kakao.vectormap.** { *; }
+-keep class com.kakao.vectortile.** { *; }
+-keep class com.kakao.sdk.common.** { *; }
+-dontwarn com.kakao.**
